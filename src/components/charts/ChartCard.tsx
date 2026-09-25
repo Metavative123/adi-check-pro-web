@@ -11,11 +11,11 @@ export default function ChartCard({
   children: React.ReactNode;
 }) {
   return (
-    <section className="rounded-2xl border border-ink/10 bg-white p-5 shadow-lg shadow-ink/5">
+    <section className="rounded-2xl border border-line bg-surface p-5 shadow-lg shadow-shade">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h2 className="font-semibold text-ink">{title}</h2>
-          {subtitle && <p className="mt-0.5 text-xs text-ink/50">{subtitle}</p>}
+          <h2 className="font-semibold text-fg">{title}</h2>
+          {subtitle && <p className="mt-0.5 text-xs text-fg/50">{subtitle}</p>}
         </div>
         {action}
       </div>
@@ -26,7 +26,7 @@ export default function ChartCard({
 
 export function EmptyChart({ message }: { message: string }) {
   return (
-    <div className="flex h-[240px] items-center justify-center rounded-xl border border-dashed border-ink/15 text-sm text-ink/40">
+    <div className="flex h-[240px] items-center justify-center rounded-xl border border-dashed border-line text-sm text-fg/40">
       {message}
     </div>
   );
@@ -38,7 +38,7 @@ export function Legend({ items }: { items: { label: string; color: string }[] })
   return (
     <ul className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
       {items.map((item) => (
-        <li key={item.label} className="flex items-center gap-1.5 text-xs text-ink/60">
+        <li key={item.label} className="flex items-center gap-1.5 text-xs text-fg/60">
           <span
             className="h-2.5 w-2.5 rounded-sm"
             style={{ backgroundColor: item.color }}

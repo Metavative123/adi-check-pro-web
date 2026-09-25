@@ -75,7 +75,7 @@ export default function DashboardPage() {
           <Avatar name={user.name} size="lg" />
           <div>
             <h2 className="text-xl font-semibold">{user.name}</h2>
-            <p className="text-sm text-ink/60">
+            <p className="text-sm text-fg/60">
               {user.adiBadgeNumber} · {user.testCenters.length} test centre
               {user.testCenters.length === 1 ? "" : "s"}
             </p>
@@ -84,7 +84,7 @@ export default function DashboardPage() {
 
         <button
           onClick={() => setReportOpen(true)}
-          className="flex items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-slate-50"
+          className="flex items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4 py-2.5 text-sm font-medium text-fg transition hover:bg-raised"
         >
           <PictureAsPdfOutlinedIcon fontSize="small" />
           Export PDF report
@@ -97,7 +97,7 @@ export default function DashboardPage() {
       {/* A short tail of history, with the way through to the rest */}
       <div>
         <div className="mb-3 flex items-center justify-between">
-          <h2 className="font-semibold text-ink">Latest tests</h2>
+          <h2 className="font-semibold text-fg">Latest tests</h2>
           <Link
             href="/tests"
             className="flex items-center gap-1 text-sm font-medium text-brand hover:underline"

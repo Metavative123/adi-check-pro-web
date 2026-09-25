@@ -9,7 +9,7 @@ import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 
 const inputClass =
-  "w-full rounded-lg border border-ink/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
+  "w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
 
 // Handy starting points, so the common cases are one click.
 function monthsAgo(months: number) {
@@ -65,7 +65,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
   return (
     <Modal open onClose={onClose} title="Export standards report">
       <div className="space-y-5">
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-fg/60">
           A PDF of every test in the period, with the calculation behind each figure
           and the rules used to work out the overall score.
         </p>
@@ -79,7 +79,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
                 setFrom(monthsAgo(preset.months));
                 setTo(today);
               }}
-              className="rounded-lg border border-ink/15 px-3 py-1.5 text-xs font-medium text-ink/70 transition hover:bg-slate-50"
+              className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-fg/70 transition hover:bg-raised"
             >
               {preset.label}
             </button>
@@ -88,7 +88,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-ink">From</span>
+            <span className="mb-1.5 block text-sm font-medium text-fg">From</span>
             <input
               type="date"
               value={from}
@@ -99,7 +99,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
           </label>
 
           <label className="block">
-            <span className="mb-1.5 block text-sm font-medium text-ink">To</span>
+            <span className="mb-1.5 block text-sm font-medium text-fg">To</span>
             <input
               type="date"
               value={to}
@@ -112,12 +112,12 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
 
         {/* Privacy choice. Presented as its own decision, not a small tickbox
             among others, because it governs what leaves the app. */}
-        <div className="rounded-xl border border-ink/15 p-4">
+        <div className="rounded-xl border border-line p-4">
           <div className="flex items-start gap-2">
-            <VisibilityOffOutlinedIcon fontSize="small" className="mt-0.5 text-ink/40" />
+            <VisibilityOffOutlinedIcon fontSize="small" className="mt-0.5 text-fg/40" />
             <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-ink">Pupil names</p>
-              <p className="mt-0.5 text-xs text-ink/50">
+              <p className="text-sm font-medium text-fg">Pupil names</p>
+              <p className="mt-0.5 text-xs text-fg/50">
                 Choose whether names appear in the PDF. Every test still shows its
                 test ID, faults and result either way.
               </p>
@@ -144,7 +144,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button onClick={download} loading={busy}>
           <span className="flex items-center justify-center gap-2">
@@ -175,7 +175,7 @@ function ChoiceButton({
         "rounded-lg border px-3 py-1.5 text-xs font-medium transition " +
         (selected
           ? "border-brand bg-brand text-white"
-          : "border-ink/15 text-ink/60 hover:bg-slate-50")
+          : "border-line text-fg/60 hover:bg-raised")
       }
     >
       {label}

@@ -11,7 +11,8 @@ import {
   YAxis,
 } from "recharts";
 import type { TrendMonth } from "@/lib/api";
-import { AXIS_TICK, CHART, TOOLTIP_STYLE } from "./chartTheme";
+import { axisTick, chartTheme, tooltipStyle } from "./chartTheme";
+import { useTheme } from "@/lib/theme";
 import ChartCard, { EmptyChart } from "./ChartCard";
 
 // One series, so no legend - the title names it. The dashed reference line is
@@ -23,6 +24,11 @@ export default function PassRateTrendChart({
   months: TrendMonth[];
   threshold: number;
 }) {
+  const { resolvedTheme } = useTheme();
+  const CHART = chartTheme(resolvedTheme === "dark");
+  const AXIS_TICK = axisTick(CHART);
+  const TOOLTIP_STYLE = tooltipStyle(CHART);
+
   const withData = months.filter((m) => m.passRate !== null);
 
   return (

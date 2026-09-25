@@ -30,7 +30,7 @@ export default function ForgotPasswordPage() {
     return (
       <AuthLayout title="Check your email" subtitle={`We sent a reset link to ${email}.`}>
         <div className="space-y-6">
-          <div className="flex items-center gap-3 rounded-lg bg-brand-light p-4 text-sm text-brand-dark">
+          <div className="flex items-center gap-3 rounded-lg bg-brand-light p-4 text-sm text-brand-fg">
             <MarkEmailReadIcon />
             <span>The link expires in 30 minutes.</span>
           </div>
@@ -72,7 +72,7 @@ function BackToLogin() {
   return (
     <Link
       href="/login"
-      className="flex items-center justify-center gap-1 text-sm text-ink/60 hover:text-ink"
+      className="flex items-center justify-center gap-1 text-sm text-fg/60 hover:text-fg"
     >
       <ArrowBackIcon fontSize="small" /> Back to sign in
     </Link>

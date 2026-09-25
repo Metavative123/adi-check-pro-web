@@ -34,10 +34,10 @@ export default function AuthLayout({
       </section>
 
       {/* Right: the form */}
-      <section className="flex flex-1 items-center justify-center bg-slate-50 px-6 py-12">
-        <div className="w-full max-w-md rounded-2xl border border-ink/10 bg-white p-8 shadow-lg shadow-ink/5">
-          <h1 className="text-2xl font-semibold text-ink">{title}</h1>
-          <p className="mt-2 text-sm text-ink/60">{subtitle}</p>
+      <section className="flex flex-1 items-center justify-center bg-canvas px-6 py-12">
+        <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-8 shadow-lg shadow-shade">
+          <h1 className="text-2xl font-semibold text-fg">{title}</h1>
+          <p className="mt-2 text-sm text-fg/60">{subtitle}</p>
           <div className="mt-8">{children}</div>
         </div>
       </section>

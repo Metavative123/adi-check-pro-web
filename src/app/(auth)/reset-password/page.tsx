@@ -37,7 +37,7 @@ export default function ResetPasswordPage() {
     return (
       <AuthLayout title="Password updated" subtitle="You can now sign in with your new password.">
         <div className="space-y-6">
-          <div className="flex items-center gap-3 rounded-lg bg-brand-light p-4 text-sm text-brand-dark">
+          <div className="flex items-center gap-3 rounded-lg bg-brand-light p-4 text-sm text-brand-fg">
             <CheckCircleIcon />
             <span>All set.</span>
           </div>
@@ -74,7 +74,7 @@ export default function ResetPasswordPage() {
           onChange={(e) => setConfirm(e.target.value)}
           icon={<LockOutlinedIcon fontSize="small" />}
         />
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
         <Button loading={loading}>Update password</Button>
       </form>
     </AuthLayout>

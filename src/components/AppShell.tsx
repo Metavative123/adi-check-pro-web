@@ -118,7 +118,7 @@ export default function AppShell({
   );
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-canvas">
       {/* Permanent drawer, desktop only */}
       <aside className="fixed inset-y-0 left-0 hidden w-60 lg:block">{drawer}</aside>
 
@@ -135,15 +135,15 @@ export default function AppShell({
 
       <div className="lg:pl-60">
         {/* Top bar: the menu button lives here on mobile */}
-        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-ink/10 bg-white/90 px-4 py-3 backdrop-blur sm:px-6">
+        <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-line bg-surface/90 px-4 py-3 backdrop-blur sm:px-6">
           <button
             onClick={() => setDrawerOpen(true)}
-            className="text-ink/60 hover:text-ink lg:hidden"
+            className="text-fg/60 hover:text-fg lg:hidden"
             aria-label="Open menu"
           >
             <MenuIcon />
           </button>
-          <h1 className="flex-1 truncate font-semibold text-ink">{title}</h1>
+          <h1 className="flex-1 truncate font-semibold text-fg">{title}</h1>
           {action}
         </header>
 

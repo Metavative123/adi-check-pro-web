@@ -62,7 +62,7 @@ export default function LoginPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-ink/40 hover:text-ink"
+              className="text-fg/40 hover:text-fg"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -75,7 +75,7 @@ export default function LoginPage() {
         />
 
         <div className="flex items-center justify-between text-sm">
-          <label className="flex items-center gap-2 text-ink/70">
+          <label className="flex items-center gap-2 text-fg/70">
             <input type="checkbox" className="accent-brand" />
             Remember me
           </label>
@@ -84,11 +84,11 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button loading={loading}>Sign in</Button>
 
-        <p className="text-center text-sm text-ink/60">
+        <p className="text-center text-sm text-fg/60">
           New to ADI Check Pro?{" "}
           <Link href="/signup" className="font-medium text-brand hover:underline">
             Create an account

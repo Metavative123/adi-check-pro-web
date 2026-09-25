@@ -10,20 +10,26 @@ import {
   YAxis,
 } from "recharts";
 import type { TrendMonth } from "@/lib/api";
-import { AXIS_TICK, CHART, TOOLTIP_STYLE } from "./chartTheme";
+import { axisTick, chartTheme, tooltipStyle } from "./chartTheme";
+import { useTheme } from "@/lib/theme";
 import ChartCard, { EmptyChart, Legend } from "./ChartCard";
 
-// Volume per month, split pass/fail - the counts behind the pass-rate line.
-//
-// Passed is the series that matters, so it carries the brand hue and failed
-// sits in neutral grey. Green-vs-red was measured and rejected: it fails
-// colourblind separation, and grey separates by chroma instead of hue.
-const SERIES = [
-  { key: "passed", label: "Passed", color: CHART.passed },
-  { key: "failed", label: "Failed", color: CHART.failed },
-] as const;
-
 export default function TestBreakdownChart({ months }: { months: TrendMonth[] }) {
+  const { resolvedTheme } = useTheme();
+  const CHART = chartTheme(resolvedTheme === "dark");
+  const AXIS_TICK = axisTick(CHART);
+  const TOOLTIP_STYLE = tooltipStyle(CHART);
+
+  // Volume per month, split pass/fail - the counts behind the pass-rate line.
+  //
+  // Passed is the series that matters, so it carries the brand hue and failed
+  // sits in neutral grey. Green-vs-red was measured and rejected: it fails
+  // colourblind separation, and grey separates by chroma instead of hue.
+  const SERIES = [
+    { key: "passed", label: "Passed", color: CHART.passed },
+    { key: "failed", label: "Failed", color: CHART.failed },
+  ] as const;
+
   const hasTests = months.some((m) => m.total > 0);
 
   return (

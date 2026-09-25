@@ -1,14 +1,73 @@
 @import "tailwindcss";
 
-/* Brand tokens — used as Tailwind classes, e.g. bg-brand, text-ink */
+/* Dark mode is driven by data-theme on <html>, set before first paint by the
+   script in layout.tsx. "system" is resolved to light or dark in JS, so the
+   CSS only ever deals with two concrete themes. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Design tokens. Utilities reference these custom properties, so overriding a
+   property under [data-theme="dark"] repaints every utility that uses it -
+   no dark: variant needed for ordinary surfaces, text and borders. */
 @theme {
-  --color-brand: #00703c; /* DVSA green */
+  /* Brand - the same in both themes */
+  --color-brand: #00703c;
   --color-brand-dark: #005a30;
-  --color-brand-light: #e6f2ec;
-  --color-ink: #0b1b2b; /* dark navy, the gauge face */
+  --color-dial: #f5a623;
+
+  /* The navy used for panels that are dark in BOTH themes: the drawer, the
+     masthead, the gauge card. Not a text colour. */
+  --color-ink: #0b1b2b;
   --color-ink-soft: #16304a;
-  --color-dial: #f5a623; /* gauge amber */
+
+  /* Theme-dependent. Light values here, dark values below. */
+  --color-canvas: #f6f7f9; /* page background */
+  --color-surface: #ffffff; /* cards, panels, inputs */
+  --color-raised: #f1f4f7; /* chips, hovers, subtle fills */
+  --color-fg: #0b1b2b; /* primary text */
+  --color-line: #e3e7ec; /* borders, dividers */
+  --color-shade: rgb(11 27 43 / 0.06); /* card shadow colour */
+
+  --color-brand-light: #e6f2ec; /* brand-tinted fill */
+  --color-brand-fg: #005a30; /* text on brand-light */
+
+  --color-danger: #dc2626; /* error text */
+  --color-danger-fg: #b91c1c; /* text on danger-bg */
+  --color-danger-bg: #fef2f2;
+  --color-danger-line: #fecaca;
+
   --font-sans: var(--font-geist-sans);
+}
+
+/* Light is the default; naming it explicitly lets the toggle switch back. */
+:root,
+[data-theme="light"] {
+  color-scheme: light;
+}
+
+/* The dark theme is chosen, not an automatic inversion: each value is picked
+   for the dark surface it sits on. */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --color-canvas: #070c12;
+  --color-surface: #121a24;
+  --color-raised: #1a232f;
+  --color-fg: #e6ecf3;
+  --color-line: #243040;
+  --color-shade: rgb(0 0 0 / 0.45);
+
+  /* The drawer stays navy in both themes, lifted just clear of the canvas. */
+  --color-ink: #0e1723;
+  --color-ink-soft: #1b2c42;
+
+  /* Green on a dark ground: the light-mode pair would be unreadable here. */
+  --color-brand-light: #0f2b1f;
+  --color-brand-fg: #6ee7a8;
+
+  --color-danger: #f87171;
+  --color-danger-fg: #fca5a5;
+  --color-danger-bg: #2a1214;
+  --color-danger-line: #4c1d1d;
 }
 
 body {

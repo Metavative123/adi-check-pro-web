@@ -82,7 +82,7 @@ export default function SignUpPage() {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="text-ink/40 hover:text-ink"
+              className="text-fg/40 hover:text-fg"
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword ? (
@@ -104,7 +104,7 @@ export default function SignUpPage() {
           icon={<LockOutlinedIcon fontSize="small" />}
         />
 
-        <label className="flex items-start gap-2 text-sm text-ink/70">
+        <label className="flex items-start gap-2 text-sm text-fg/70">
           <input type="checkbox" required className="mt-1 accent-brand" />
           <span>
             I agree to the{" "}
@@ -119,11 +119,11 @@ export default function SignUpPage() {
           </span>
         </label>
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button loading={loading}>Create account</Button>
 
-        <p className="text-center text-sm text-ink/60">
+        <p className="text-center text-sm text-fg/60">
           Already have an account?{" "}
           <Link href="/login" className="font-medium text-brand hover:underline">
             Sign in

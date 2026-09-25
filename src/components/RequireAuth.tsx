@@ -59,7 +59,7 @@ export default function RequireAuth({
 
   if (state.status !== "allowed") {
     return (
-      <main className="flex min-h-screen items-center justify-center text-sm text-ink/60">
+      <main className="flex min-h-screen items-center justify-center text-sm text-fg/60">
         Loading...
       </main>
     );

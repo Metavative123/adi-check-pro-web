@@ -28,7 +28,7 @@ const LABELS: Record<Billing["status"], string> = {
 export default function BillingPage() {
   // useSearchParams needs a Suspense boundary to stay prerenderable.
   return (
-    <Suspense fallback={<p className="text-sm text-ink/60">Loading...</p>}>
+    <Suspense fallback={<p className="text-sm text-fg/60">Loading...</p>}>
       <BillingContent />
     </Suspense>
   );
@@ -102,14 +102,14 @@ function BillingContent() {
   }
 
   if (!billing) {
-    return <p className="text-sm text-ink/60">{error || "Loading..."}</p>;
+    return <p className="text-sm text-fg/60">{error || "Loading..."}</p>;
   }
 
   if (!billing.enabled) {
     return (
-      <div className="mx-auto max-w-2xl rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+      <div className="mx-auto max-w-2xl rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
         <h2 className="font-semibold">Billing is switched off</h2>
-        <p className="mt-2 text-sm text-ink/60">
+        <p className="mt-2 text-sm text-fg/60">
           Every feature is available with no subscription. Set{" "}
           <span className="font-mono text-xs">BILLING_ENABLED=true</span> on the API
           to turn payments back on.
@@ -125,13 +125,13 @@ function BillingContent() {
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       {returningFromCheckout && subscribed && (
-        <p className="rounded-xl bg-brand-light px-4 py-3 text-sm text-brand-dark">
+        <p className="rounded-xl bg-brand-light px-4 py-3 text-sm text-brand-fg">
           Payment received. Your subscription is active.
         </p>
       )}
 
       {billing.testMode && (
-        <p className="flex items-center gap-2 rounded-xl border border-dial/30 bg-dial/10 px-4 py-3 text-xs text-ink/70">
+        <p className="flex items-center gap-2 rounded-xl border border-dial/30 bg-dial/10 px-4 py-3 text-xs text-fg/70">
           <ScienceOutlinedIcon sx={{ fontSize: 16 }} className="text-dial" />
           Stripe test mode. Use card <span className="font-mono">4242 4242 4242 4242</span>,
           any future expiry and any CVC. No real money moves.
@@ -139,25 +139,25 @@ function BillingContent() {
       )}
 
       {/* Current plan */}
-      <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+      <section className="rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-sm text-ink/60">Current plan</p>
+            <p className="text-sm text-fg/60">Current plan</p>
             <p className="text-2xl font-semibold">{LABELS[billing.status]}</p>
           </div>
           <span
             className={
               "rounded-full px-3 py-1 text-xs font-semibold " +
               (billing.hasAccess
-                ? "bg-brand-light text-brand-dark"
-                : "bg-red-50 text-red-700")
+                ? "bg-brand-light text-brand-fg"
+                : "bg-danger-bg text-danger-fg")
             }
           >
             {billing.hasAccess ? "Active" : "No access"}
           </span>
         </div>
 
-        <p className="mt-3 text-sm text-ink/60">
+        <p className="mt-3 text-sm text-fg/60">
           {onTrial && billing.hasAccess && (
             <>
               {billing.trialDaysLeft} day{billing.trialDaysLeft === 1 ? "" : "s"} left in
@@ -184,16 +184,16 @@ function BillingContent() {
 
       {/* Plan on offer */}
       {!subscribed && (
-        <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+        <section className="rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
           <div className="flex items-baseline gap-2">
             <h2 className="text-lg font-semibold">Pro</h2>
             <p className="text-2xl font-semibold">£19</p>
-            <p className="text-sm text-ink/50">per month</p>
+            <p className="text-sm text-fg/50">per month</p>
           </div>
 
           <ul className="mt-4 space-y-2">
             {FEATURES.map((feature) => (
-              <li key={feature} className="flex items-center gap-2 text-sm text-ink/70">
+              <li key={feature} className="flex items-center gap-2 text-sm text-fg/70">
                 <CheckIcon sx={{ fontSize: 16 }} className="text-brand" />
                 {feature}
               </li>
@@ -210,7 +210,7 @@ function BillingContent() {
           </button>
 
           {!billing.configured && (
-            <p className="mt-2 text-xs text-ink/50">
+            <p className="mt-2 text-xs text-fg/50">
               Billing is not configured on the server yet.
             </p>
           )}
@@ -219,22 +219,22 @@ function BillingContent() {
 
       {/* Manage an existing subscription */}
       {billing.hasBillingAccount && (
-        <section className="rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+        <section className="rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
           <h2 className="font-semibold">Manage billing</h2>
-          <p className="mt-1 text-sm text-ink/60">
+          <p className="mt-1 text-sm text-fg/60">
             Change your card, download invoices or cancel, on Stripe.
           </p>
           <button
             onClick={manage}
             disabled={busy}
-            className="mt-4 rounded-lg border border-ink/15 px-4 py-2 text-sm font-medium text-ink transition hover:bg-slate-50 disabled:opacity-60"
+            className="mt-4 rounded-lg border border-line px-4 py-2 text-sm font-medium text-fg transition hover:bg-raised disabled:opacity-60"
           >
             Open billing portal
           </button>
         </section>
       )}
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
 
       <button
         onClick={() => {

@@ -18,7 +18,7 @@ export default function RangeToggle({
 }) {
   return (
     <div
-      className="inline-flex rounded-lg border border-ink/15 bg-white p-0.5"
+      className="inline-flex rounded-lg border border-line bg-surface p-0.5"
       role="group"
       aria-label="Time range"
     >
@@ -31,7 +31,7 @@ export default function RangeToggle({
             "rounded-md px-3 py-1.5 text-xs font-medium transition " +
             (value === option.value
               ? "bg-brand text-white"
-              : "text-ink/60 hover:bg-slate-50")
+              : "text-fg/60 hover:bg-raised")
           }
         >
           {option.label}

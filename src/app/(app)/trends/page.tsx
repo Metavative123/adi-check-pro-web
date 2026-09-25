@@ -56,7 +56,7 @@ export default function TrendsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-ink/60">
+        <p className="text-sm text-fg/60">
           {trend
             ? `${trend.totals.tests} test${trend.totals.tests === 1 ? "" : "s"} in this period · ${trend.totals.passed} passed · ${trend.totals.failed} failed`
             : "Loading..."}

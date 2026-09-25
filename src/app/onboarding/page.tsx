@@ -100,7 +100,7 @@ export default function OnboardingPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center text-sm text-ink/60">
+      <main className="flex min-h-screen items-center justify-center text-sm text-fg/60">
         Loading...
       </main>
     );
@@ -110,7 +110,7 @@ export default function OnboardingPage() {
   const ready = badgeSaved && user.testCenters.length > 0;
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-canvas">
       <header className="flex items-center gap-2 bg-ink px-6 py-4 text-white">
         <SpeedIcon className="text-dial" />
         <span className="font-semibold">ADI Check Pro</span>
@@ -118,12 +118,12 @@ export default function OnboardingPage() {
 
       <div className="mx-auto max-w-lg px-6 py-10">
         <h1 className="text-2xl font-semibold">Finish setting up</h1>
-        <p className="mt-2 text-sm text-ink/60">
+        <p className="mt-2 text-sm text-fg/60">
           Two things before you can start logging tests, {user.name}.
         </p>
 
         {/* Step 1 - badge number */}
-        <section className="mt-8 rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+        <section className="mt-8 rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
           <div className="mb-4 flex items-center gap-2">
             <BadgeOutlinedIcon className="text-brand" fontSize="small" />
             <h2 className="font-semibold">ADI badge number</h2>
@@ -135,7 +135,7 @@ export default function OnboardingPage() {
               value={badge}
               onChange={(e) => setBadge(e.target.value)}
               placeholder="ADI-123456"
-              className="w-full rounded-lg border border-ink/15 px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             <button
               onClick={saveBadge}
@@ -148,11 +148,11 @@ export default function OnboardingPage() {
         </section>
 
         {/* Step 2 - test centres */}
-        <section className="mt-6 rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+        <section className="mt-6 rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
           <div className="mb-4 flex items-center gap-2">
             <PlaceOutlinedIcon className="text-brand" fontSize="small" />
             <h2 className="font-semibold">Test centres</h2>
-            <span className="text-xs text-ink/50">add as many as you need</span>
+            <span className="text-xs text-fg/50">add as many as you need</span>
           </div>
 
           {user.testCenters.length > 0 && (
@@ -160,15 +160,15 @@ export default function OnboardingPage() {
               {user.testCenters.map((c) => (
                 <li
                   key={c._id}
-                  className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2 text-sm"
+                  className="flex items-center justify-between rounded-lg bg-raised px-3 py-2 text-sm"
                 >
                   <span>
                     {c.name}
-                    {c.code && <span className="ml-2 text-ink/40">{c.code}</span>}
+                    {c.code && <span className="ml-2 text-fg/40">{c.code}</span>}
                   </span>
                   <button
                     onClick={() => removeCenter(c._id)}
-                    className="text-ink/40 hover:text-red-600"
+                    className="text-fg/40 hover:text-danger"
                     aria-label={"Remove " + c.name}
                   >
                     <DeleteOutlinedIcon fontSize="small" />
@@ -184,14 +184,14 @@ export default function OnboardingPage() {
               onChange={(e) => setCenterName(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addCenter()}
               placeholder="Centre name"
-              className="w-full rounded-lg border border-ink/15 px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              className="w-full rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             <input
               value={centerCode}
               onChange={(e) => setCenterCode(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && addCenter()}
               placeholder="Code"
-              className="w-24 shrink-0 rounded-lg border border-ink/15 px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+              className="w-24 shrink-0 rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
             />
             <button
               onClick={addCenter}
@@ -204,7 +204,7 @@ export default function OnboardingPage() {
           </div>
         </section>
 
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-4 text-sm text-danger">{error}</p>}
 
         <div className="mt-8">
           <Button onClick={() => router.push("/dashboard")} disabled={!ready}>

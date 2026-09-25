@@ -25,8 +25,8 @@ export default function TrialBanner() {
       className={
         "mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl px-4 py-3 text-sm " +
         (expired
-          ? "border border-red-200 bg-red-50 text-red-800"
-          : "border border-dial/30 bg-dial/10 text-ink/80")
+          ? "border border-danger-line bg-danger-bg text-danger-fg"
+          : "border border-dial/30 bg-dial/10 text-fg/80")
       }
     >
       <span>

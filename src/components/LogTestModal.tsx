@@ -38,7 +38,7 @@ const EMPTY: Form = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-ink/15 bg-white px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
+  "w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
 
 export default function LogTestModal({
   onClose,
@@ -228,7 +228,7 @@ export default function LogTestModal({
             onChange={(v) => set("dangerous", v)}
           />
 
-          <div className="space-y-4 border-t border-ink/10 pt-5">
+          <div className="space-y-4 border-t border-line pt-5">
             <YesNo
               label="Physical intervention"
               value={form.physicalIntervention}
@@ -275,13 +275,13 @@ export default function LogTestModal({
         </div>
       )}
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {error && <p className="mt-4 text-sm text-danger">{error}</p>}
 
       <div className="mt-6 flex gap-3">
         {step > 1 && (
           <button
             onClick={back}
-            className="flex items-center gap-1 rounded-lg border border-ink/15 px-4 py-2.5 text-sm font-medium text-ink hover:bg-slate-50"
+            className="flex items-center gap-1 rounded-lg border border-line px-4 py-2.5 text-sm font-medium text-fg hover:bg-raised"
           >
             <ArrowBackIcon fontSize="small" /> Back
           </button>
@@ -301,7 +301,7 @@ export default function LogTestModal({
 function Labelled({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-ink">{label}</span>
+      <span className="mb-1.5 block text-sm font-medium text-fg">{label}</span>
       {children}
     </label>
   );
@@ -324,14 +324,14 @@ function Steps({ step }: { step: number }) {
                   ? "bg-brand text-white"
                   : done
                     ? "bg-brand-light text-brand"
-                    : "bg-slate-100 text-ink/40")
+                    : "bg-raised text-fg/40")
               }
             >
               {n}
             </span>
             <span
               className={
-                "text-[11px] " + (current ? "font-medium text-ink" : "text-ink/40")
+                "text-[11px] " + (current ? "font-medium text-fg" : "text-fg/40")
               }
             >
               {label}
@@ -358,8 +358,8 @@ function ResultCard({
 }) {
   const active =
     tone === "pass"
-      ? "border-brand bg-brand-light text-brand-dark"
-      : "border-red-500 bg-red-50 text-red-700";
+      ? "border-brand bg-brand-light text-brand-fg"
+      : "border-danger bg-danger-bg text-danger-fg";
 
   return (
     <button
@@ -367,7 +367,7 @@ function ResultCard({
       onClick={onClick}
       className={
         "flex flex-col items-center gap-2 rounded-xl border-2 py-8 text-sm font-semibold transition " +
-        (selected ? active : "border-ink/10 text-ink/50 hover:border-ink/25")
+        (selected ? active : "border-line text-fg/50 hover:border-line")
       }
     >
       {icon}
@@ -390,8 +390,8 @@ function Counter({
   return (
     <div className="flex items-center justify-between">
       <div>
-        <p className="text-sm font-medium text-ink">{label}</p>
-        {hint && <p className="text-xs text-ink/50">{hint}</p>}
+        <p className="text-sm font-medium text-fg">{label}</p>
+        {hint && <p className="text-xs text-fg/50">{hint}</p>}
       </div>
       <div className="flex items-center gap-3">
         <StepButton onClick={() => onChange(Math.max(0, value - 1))} label={"Decrease " + label}>
@@ -420,7 +420,7 @@ function StepButton({
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="h-8 w-8 rounded-lg border border-ink/15 text-lg leading-none text-ink hover:bg-slate-50"
+      className="h-8 w-8 rounded-lg border border-line text-lg leading-none text-fg hover:bg-raised"
     >
       {children}
     </button>
@@ -438,7 +438,7 @@ function YesNo({
 }) {
   return (
     <div className="flex items-center justify-between">
-      <p className="text-sm font-medium text-ink">{label}</p>
+      <p className="text-sm font-medium text-fg">{label}</p>
       <div className="flex gap-2">
         {[true, false].map((option) => (
           <button
@@ -449,7 +449,7 @@ function YesNo({
               "rounded-lg border px-4 py-1.5 text-sm transition " +
               (value === option
                 ? "border-brand bg-brand text-white"
-                : "border-ink/15 text-ink/60 hover:bg-slate-50")
+                : "border-line text-fg/60 hover:bg-raised")
             }
           >
             {option ? "Yes" : "No"}
@@ -470,9 +470,9 @@ function ReviewGroup({
   children: React.ReactNode;
 }) {
   return (
-    <div className="rounded-xl border border-ink/10 p-4">
+    <div className="rounded-xl border border-line p-4">
       <div className="mb-2 flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-ink">{title}</h3>
+        <h3 className="text-sm font-semibold text-fg">{title}</h3>
         <button
           onClick={onEdit}
           className="flex items-center gap-1 text-xs font-medium text-brand hover:underline"
@@ -496,11 +496,11 @@ function Row({
 }) {
   return (
     <div className="flex justify-between text-sm">
-      <dt className="text-ink/60">{label}</dt>
+      <dt className="text-fg/60">{label}</dt>
       <dd
         className={
           "font-medium " +
-          (tone === "pass" ? "text-brand" : tone === "fail" ? "text-red-600" : "text-ink")
+          (tone === "pass" ? "text-brand" : tone === "fail" ? "text-danger" : "text-fg")
         }
       >
         {value || "-"}

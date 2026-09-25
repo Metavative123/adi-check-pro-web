@@ -93,20 +93,20 @@ export default function TestsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       {/* Search and filters sit in one row above the results. */}
-      <div className="rounded-2xl border border-ink/10 bg-white p-4 shadow-lg shadow-ink/5">
-        <div className="flex items-center gap-2 rounded-lg border border-ink/15 px-3 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20">
-          <SearchIcon fontSize="small" className="text-ink/40" />
+      <div className="rounded-2xl border border-line bg-surface p-4 shadow-lg shadow-shade">
+        <div className="flex items-center gap-2 rounded-lg border border-line px-3 focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/20">
+          <SearchIcon fontSize="small" className="text-fg/40" />
           <input
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
             placeholder="Search pupil name or test id (e.g. T-9F3A21)"
-            className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-ink/35"
+            className="w-full bg-transparent py-2.5 text-sm outline-none placeholder:text-fg/35"
             aria-label="Search by pupil name or test id"
           />
           {searchInput && (
             <button
               onClick={() => setSearchInput("")}
-              className="text-ink/40 hover:text-ink"
+              className="text-fg/40 hover:text-fg"
               aria-label="Clear search"
             >
               <CloseIcon fontSize="small" />
@@ -117,8 +117,8 @@ export default function TestsPage() {
         <TestFilters value={filters} onChange={updateFilters} />
 
         {(searchInput || activeCount > 0) && (
-          <div className="mt-3 flex items-center justify-between border-t border-ink/10 pt-3">
-            <p className="text-xs text-ink/50">
+          <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
+            <p className="text-xs text-fg/50">
               {loading
                 ? "Searching..."
                 : `${pagination?.total ?? 0} test${pagination?.total === 1 ? "" : "s"} match`}

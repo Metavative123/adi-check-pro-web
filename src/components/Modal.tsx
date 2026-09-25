@@ -42,14 +42,14 @@ export default function Modal({
       aria-label={title}
     >
       <div
-        className="max-h-[92vh] w-full max-w-lg animate-fade-up overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:rounded-2xl"
+        className="max-h-[92vh] w-full max-w-lg animate-fade-up overflow-y-auto rounded-t-2xl bg-surface shadow-xl sm:rounded-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-ink/10 px-6 py-4">
-          <h2 className="font-semibold text-ink">{title}</h2>
+        <div className="flex items-center justify-between border-b border-line px-6 py-4">
+          <h2 className="font-semibold text-fg">{title}</h2>
           <button
             onClick={onClose}
-            className="text-ink/40 hover:text-ink"
+            className="text-fg/40 hover:text-fg"
             aria-label="Close"
           >
             <CloseIcon fontSize="small" />

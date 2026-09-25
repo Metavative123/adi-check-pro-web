@@ -10,18 +10,25 @@ import {
   YAxis,
 } from "recharts";
 import type { TrendMonth } from "@/lib/api";
-import { AXIS_TICK, CHART, TOOLTIP_STYLE } from "./chartTheme";
+import { axisTick, chartTheme, tooltipStyle } from "./chartTheme";
+import { useTheme } from "@/lib/theme";
 import ChartCard, { EmptyChart, Legend } from "./ChartCard";
 
-// Fault severity is an ordered scale, so this is a single-hue ordinal ramp
-// (light = least serious) rather than three unrelated categorical hues.
-const SERIES = [
-  { key: "driving", label: "Driving", color: CHART.faults.driving },
-  { key: "serious", label: "Serious", color: CHART.faults.serious },
-  { key: "dangerous", label: "Dangerous", color: CHART.faults.dangerous },
-] as const;
-
 export default function FaultCategoryChart({ months }: { months: TrendMonth[] }) {
+  const { resolvedTheme } = useTheme();
+  const CHART = chartTheme(resolvedTheme === "dark");
+  const AXIS_TICK = axisTick(CHART);
+  const TOOLTIP_STYLE = tooltipStyle(CHART);
+
+  // Fault severity is an ordered scale, so this is a single-hue ordinal ramp
+  // (light = least serious) rather than three unrelated categorical hues.
+  // Built per render because the ramp differs between light and dark.
+  const SERIES = [
+    { key: "driving", label: "Driving", color: CHART.faults.driving },
+    { key: "serious", label: "Serious", color: CHART.faults.serious },
+    { key: "dangerous", label: "Dangerous", color: CHART.faults.dangerous },
+  ] as const;
+
   const hasFaults = months.some((m) => m.driving + m.serious + m.dangerous > 0);
 
   return (

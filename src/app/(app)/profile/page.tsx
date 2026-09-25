@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
 import PlaceOutlinedIcon from "@mui/icons-material/PlaceOutlined";
 import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import EditIcon from "@mui/icons-material/Edit";
@@ -9,6 +10,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import Avatar from "@/components/Avatar";
+import ThemeToggle from "@/components/ThemeToggle";
 import { api, type TestCenter } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { useApp } from "@/lib/appContext";
@@ -17,7 +19,7 @@ import { useApp } from "@/lib/appContext";
 // string containing "w-full" does not override it: Tailwind picks the winner
 // by stylesheet order, not by position in the className string.
 const inputClass =
-  "rounded-lg border border-ink/15 px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
+  "rounded-lg border border-line px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
 
 // min-w-0 lets the name field shrink instead of pushing the button out of the card.
 const nameInputClass = inputClass + " min-w-[9rem] flex-1";
@@ -92,12 +94,12 @@ export default function ProfilePage() {
           <Avatar name={user.name} size="lg" />
           <div>
             <h1 className="text-xl font-semibold">{user.name}</h1>
-            <p className="text-sm text-ink/60">{user.email}</p>
+            <p className="text-sm text-fg/60">{user.email}</p>
           </div>
         </div>
 
         {/* Badge number */}
-        <section className="mt-8 rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+        <section className="mt-8 rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
           <div className="mb-4 flex items-center gap-2">
             <BadgeOutlinedIcon className="text-brand" fontSize="small" />
             <h2 className="font-semibold">ADI badge number</h2>
@@ -131,7 +133,7 @@ export default function ProfilePage() {
               </button>
               <button
                 onClick={() => setBadge(null)}
-                className="shrink-0 rounded-lg border border-ink/15 px-3 text-ink/60 hover:bg-slate-50"
+                className="shrink-0 rounded-lg border border-line px-3 text-fg/60 hover:bg-raised"
                 aria-label="Cancel"
               >
                 <CloseIcon fontSize="small" />
@@ -141,16 +143,16 @@ export default function ProfilePage() {
         </section>
 
         {/* Test centres */}
-        <section className="mt-6 rounded-2xl border border-ink/10 bg-white p-6 shadow-lg shadow-ink/5">
+        <section className="mt-6 rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
           <div className="mb-4 flex items-center gap-2">
             <PlaceOutlinedIcon className="text-brand" fontSize="small" />
             <h2 className="font-semibold">Test centres</h2>
-            <span className="text-xs text-ink/50">{user.testCenters.length} saved</span>
+            <span className="text-xs text-fg/50">{user.testCenters.length} saved</span>
           </div>
 
           <ul className="space-y-2">
             {user.testCenters.map((c) => (
-              <li key={c._id} className="rounded-lg bg-slate-50 px-3 py-2">
+              <li key={c._id} className="rounded-lg bg-raised px-3 py-2">
                 {editingId === c._id ? (
                   <div className="flex flex-wrap gap-2">
                     <input
@@ -176,7 +178,7 @@ export default function ProfilePage() {
                     </button>
                     <button
                       onClick={() => setEditingId(null)}
-                      className="shrink-0 rounded-lg border border-ink/15 px-3 text-ink/60 hover:bg-white"
+                      className="shrink-0 rounded-lg border border-line px-3 text-fg/60 hover:bg-surface"
                       aria-label="Cancel"
                     >
                       <CloseIcon fontSize="small" />
@@ -186,19 +188,19 @@ export default function ProfilePage() {
                   <div className="flex items-center justify-between text-sm">
                     <span>
                       {c.name}
-                      {c.code && <span className="ml-2 text-ink/40">{c.code}</span>}
+                      {c.code && <span className="ml-2 text-fg/40">{c.code}</span>}
                     </span>
                     <span className="flex gap-2">
                       <button
                         onClick={() => startEdit(c)}
-                        className="text-ink/40 hover:text-brand"
+                        className="text-fg/40 hover:text-brand"
                         aria-label={"Edit " + c.name}
                       >
                         <EditIcon fontSize="small" />
                       </button>
                       <button
                         onClick={() => removeCenter(c._id)}
-                        className="text-ink/40 hover:text-red-600"
+                        className="text-fg/40 hover:text-danger"
                         aria-label={"Delete " + c.name}
                       >
                         <DeleteOutlinedIcon fontSize="small" />
@@ -210,7 +212,7 @@ export default function ProfilePage() {
             ))}
           </ul>
 
-          <div className="mt-4 flex flex-wrap gap-2 border-t border-ink/10 pt-4">
+          <div className="mt-4 flex flex-wrap gap-2 border-t border-line pt-4">
             <input
               value={newName}
               onChange={(e) => setNewName(e.target.value)}
@@ -235,7 +237,16 @@ export default function ProfilePage() {
           </div>
         </section>
 
-      {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      {/* Appearance */}
+      <section className="mt-6 rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
+        <div className="mb-4 flex items-center gap-2">
+          <PaletteOutlinedIcon className="text-brand" fontSize="small" />
+          <h2 className="font-semibold">Appearance</h2>
+        </div>
+        <ThemeToggle />
+      </section>
+
+      {error && <p className="mt-4 text-sm text-danger">{error}</p>}
     </div>
   );
 }

@@ -18,7 +18,7 @@ export const EMPTY_FILTERS: Filters = {
 };
 
 const inputClass =
-  "rounded-lg border border-ink/15 bg-white px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
+  "rounded-lg border border-line bg-surface px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
 
 export default function TestFilters({
   value,
@@ -74,7 +74,7 @@ export default function TestFilters({
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-xs font-medium text-ink/60">{label}</span>
+      <span className="text-xs font-medium text-fg/60">{label}</span>
       {children}
     </label>
   );
@@ -98,7 +98,7 @@ function TriState({
 
   return (
     <div
-      className="inline-flex rounded-lg border border-ink/15 bg-white p-0.5"
+      className="inline-flex rounded-lg border border-line bg-surface p-0.5"
       role="group"
       aria-label={label}
     >
@@ -112,7 +112,7 @@ function TriState({
             "rounded-md px-2.5 py-1.5 text-xs font-medium transition " +
             (value === option.value
               ? "bg-brand text-white"
-              : "text-ink/60 hover:bg-slate-50")
+              : "text-fg/60 hover:bg-raised")
           }
         >
           {option.text}

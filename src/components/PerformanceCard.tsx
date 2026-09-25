@@ -39,7 +39,7 @@ export default function PerformanceCard({ performance }: { performance: Performa
   return (
     <section className="grid gap-4 lg:grid-cols-3">
       {/* Overall standing */}
-      <div className="rounded-2xl border border-ink/10 bg-ink p-6 text-white shadow-lg shadow-ink/5">
+      <div className="rounded-2xl border border-line bg-ink p-6 text-white shadow-lg shadow-shade">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-sm text-white/60">Overall score</p>
@@ -69,7 +69,7 @@ export default function PerformanceCard({ performance }: { performance: Performa
       </div>
 
       {/* Pass rate on the dial */}
-      <div className="flex flex-col items-center rounded-2xl border border-ink/10 bg-ink p-6 text-white shadow-lg shadow-ink/5">
+      <div className="flex flex-col items-center rounded-2xl border border-line bg-ink p-6 text-white shadow-lg shadow-shade">
         <Gauge value={metrics.passRate} className="w-32" />
         <p className="mt-2 text-sm text-white/70">Pass rate</p>
         <p className="text-2xl font-semibold">{metrics.passRate}%</p>
@@ -117,17 +117,17 @@ function MetricRow({
   return (
     <div
       className={
-        "flex items-center justify-between rounded-2xl border bg-white p-4 shadow-lg shadow-ink/5 " +
-        (triggered ? "border-red-300 bg-red-50/50" : "border-ink/10")
+        "flex items-center justify-between rounded-2xl border bg-surface p-4 shadow-lg shadow-shade " +
+        (triggered ? "border-danger-line bg-danger-bg/50" : "border-line")
       }
     >
       <div>
-        <p className="text-sm text-ink/60">{label}</p>
-        <p className="text-xs text-ink/35">{threshold}</p>
+        <p className="text-sm text-fg/60">{label}</p>
+        <p className="text-xs text-fg/35">{threshold}</p>
       </div>
       <p
         className={
-          "text-2xl font-semibold tabular-nums " + (triggered ? "text-red-600" : "text-ink")
+          "text-2xl font-semibold tabular-nums " + (triggered ? "text-danger" : "text-fg")
         }
       >
         {value}
