@@ -8,6 +8,7 @@ import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import { api, type Billing } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { useApp } from "@/lib/appContext";
+import { Skeleton, SkeletonRegion } from "@/components/Skeleton";
 
 const FEATURES = [
   "Unlimited test logging",
@@ -28,7 +29,7 @@ const LABELS: Record<Billing["status"], string> = {
 export default function BillingPage() {
   // useSearchParams needs a Suspense boundary to stay prerenderable.
   return (
-    <Suspense fallback={<p className="text-sm text-fg/60">Loading...</p>}>
+    <Suspense fallback={<Skeleton className="mx-auto h-64 max-w-2xl rounded-2xl" />}>
       <BillingContent />
     </Suspense>
   );
@@ -102,7 +103,28 @@ function BillingContent() {
   }
 
   if (!billing) {
-    return <p className="text-sm text-fg/60">{error || "Loading..."}</p>;
+    if (error) return <p className="text-sm text-danger">{error}</p>;
+
+    return (
+      <div className="mx-auto max-w-2xl space-y-4">
+        <SkeletonRegion label="Loading your plan">
+          <div className="rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
+            <Skeleton className="h-3.5 w-24" />
+            <Skeleton className="mt-3 h-8 w-40" />
+            <Skeleton className="mt-4 h-3.5 w-72" />
+          </div>
+          <div className="mt-4 rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
+            <Skeleton className="h-5 w-32" />
+            <div className="mt-4 space-y-2">
+              {[0, 1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-3.5 w-56" />
+              ))}
+            </div>
+            <Skeleton className="mt-6 h-10 w-full rounded-lg" />
+          </div>
+        </SkeletonRegion>
+      </div>
+    );
   }
 
   if (!billing.enabled) {

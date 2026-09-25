@@ -26,6 +26,7 @@
   --color-fg: #0b1b2b; /* primary text */
   --color-line: #e3e7ec; /* borders, dividers */
   --color-shade: rgb(11 27 43 / 0.06); /* card shadow colour */
+  --color-shimmer: rgb(255 255 255 / 0.7); /* the sweep across skeletons */
 
   --color-brand-light: #e6f2ec; /* brand-tinted fill */
   --color-brand-fg: #005a30; /* text on brand-light */
@@ -55,6 +56,8 @@
   --color-fg: #e6ecf3;
   --color-line: #243040;
   --color-shade: rgb(0 0 0 / 0.45);
+  /* A white sweep would glare on a dark ground - barely lift it instead. */
+  --color-shimmer: rgb(255 255 255 / 0.06);
 
   /* The drawer stays navy in both themes, lifted just clear of the canvas. */
   --color-ink: #0e1723;
@@ -103,4 +106,28 @@ body {
 
 .animate-ping-slow {
   animation: ping-slow 2.4s ease-out infinite;
+}
+
+/* Skeleton shimmer: a highlight that sweeps left to right across the
+   placeholder block. */
+@keyframes shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 1.6s infinite;
+}
+
+/* Motion is decoration here - the layout already communicates "loading". */
+@media (prefers-reduced-motion: reduce) {
+  .animate-shimmer,
+  .animate-ping-slow,
+  .animate-fade-up {
+    animation: none;
+  }
 }

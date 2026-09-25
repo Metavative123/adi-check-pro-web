@@ -7,6 +7,7 @@ import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import Avatar from "@/components/Avatar";
 import LogTestModal from "@/components/LogTestModal";
 import PerformanceCard from "@/components/PerformanceCard";
+import { PerformanceSkeleton } from "@/components/Skeleton";
 import ReportModal from "@/components/ReportModal";
 import TestTable from "@/components/TestTable";
 import { api, type Performance, type Test } from "@/lib/api";
@@ -19,7 +20,9 @@ const RECENT_COUNT = 5;
 export default function DashboardPage() {
   const { user, refreshKey, refresh } = useApp();
   const [performance, setPerformance] = useState<Performance | null>(null);
-  const [recent, setRecent] = useState<Test[]>([]);
+  // null = not loaded yet. An empty array means "loaded, and there are none",
+  // which is the only time the empty message should appear.
+  const [recent, setRecent] = useState<Test[] | null>(null);
   const [editing, setEditing] = useState<Test | null>(null);
   const [reportOpen, setReportOpen] = useState(false);
   // Reloads the rows without re-reading the rating, for edits that cannot
@@ -63,8 +66,13 @@ export default function DashboardPage() {
   async function removeTest(testId: string) {
     const token = getToken();
     if (!token) return;
-    await api.deleteTest(token, testId);
-    refresh();
+
+    const { affectsRating } = await api.deleteTest(token, testId);
+    setRecent(null); // show the skeleton again while the list reloads
+
+    // Same rule as an edit: only re-read the rating when it can have moved.
+    if (affectsRating) refresh();
+    else setListKey((n) => n + 1);
   }
 
   return (
@@ -92,7 +100,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Standing right now */}
-      {performance && <PerformanceCard performance={performance} />}
+      {performance ? <PerformanceCard performance={performance} /> : <PerformanceSkeleton />}
 
       {/* A short tail of history, with the way through to the rest */}
       <div>
@@ -107,9 +115,9 @@ export default function DashboardPage() {
         </div>
 
         <TestTable
-          tests={recent}
+          tests={recent ?? []}
           pagination={null}
-          loading={false}
+          loading={recent === null}
           onPageChange={() => {}}
           onDelete={removeTest}
           onEdit={setEditing}

@@ -5,6 +5,7 @@ import FaultCategoryChart from "@/components/charts/FaultCategoryChart";
 import PassRateTrendChart from "@/components/charts/PassRateTrendChart";
 import RangeToggle from "@/components/charts/RangeToggle";
 import TestBreakdownChart from "@/components/charts/TestBreakdownChart";
+import { ChartSkeleton, Skeleton } from "@/components/Skeleton";
 import { api, type Performance, type Trend, type TrendRange } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { useApp } from "@/lib/appContext";
@@ -56,22 +57,38 @@ export default function TrendsPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-fg/60">
-          {trend
-            ? `${trend.totals.tests} test${trend.totals.tests === 1 ? "" : "s"} in this period · ${trend.totals.passed} passed · ${trend.totals.failed} failed`
-            : "Loading..."}
-        </p>
+        {trend ? (
+          <p className="text-sm text-fg/60">
+            {`${trend.totals.tests} test${trend.totals.tests === 1 ? "" : "s"} in this period · ${trend.totals.passed} passed · ${trend.totals.failed} failed`}
+          </p>
+        ) : (
+          <Skeleton className="h-4 w-64" />
+        )}
         <RangeToggle value={range} onChange={setRange} />
       </div>
 
-      <PassRateTrendChart
-        months={months}
-        threshold={performance?.thresholds.passRate ?? 55}
-      />
-      <div className="grid gap-4 xl:grid-cols-2">
-        <TestBreakdownChart months={months} />
-        <FaultCategoryChart months={months} />
-      </div>
+      {/* Until the series arrives, a chart with no data would read as
+          "no tests in this period", which is not yet known. */}
+      {trend ? (
+        <>
+          <PassRateTrendChart
+            months={months}
+            threshold={performance?.thresholds.passRate ?? 55}
+          />
+          <div className="grid gap-4 xl:grid-cols-2">
+            <TestBreakdownChart months={months} />
+            <FaultCategoryChart months={months} />
+          </div>
+        </>
+      ) : (
+        <>
+          <ChartSkeleton />
+          <div className="grid gap-4 xl:grid-cols-2">
+            <ChartSkeleton />
+            <ChartSkeleton />
+          </div>
+        </>
+      )}
     </div>
   );
 }

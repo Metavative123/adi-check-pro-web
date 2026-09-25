@@ -358,6 +358,9 @@ export const api = {
   getPerformance: (token: string) =>
     request<{ performance: Performance }>("/tests/performance", { token }),
 
+  // Like updateTest, this reports whether the performance figures moved.
+  // A test older than the rating window was not being counted, so removing
+  // it changes nothing.
   deleteTest: (token: string, testId: string) =>
-    request<{ success: boolean }>(`/tests/${testId}`, { method: "DELETE", token }),
+    request<{ affectsRating: boolean }>(`/tests/${testId}`, { method: "DELETE", token }),
 };

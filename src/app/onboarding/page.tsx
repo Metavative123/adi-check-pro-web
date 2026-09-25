@@ -8,6 +8,7 @@ import DeleteOutlinedIcon from "@mui/icons-material/DeleteOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import SpeedIcon from "@mui/icons-material/Speed";
 import Button from "@/components/Button";
+import { Skeleton, SkeletonRegion } from "@/components/Skeleton";
 import { api, type User } from "@/lib/api";
 import { getToken, clearToken } from "@/lib/auth";
 
@@ -100,8 +101,19 @@ export default function OnboardingPage() {
 
   if (!user) {
     return (
-      <main className="flex min-h-screen items-center justify-center text-sm text-fg/60">
-        Loading...
+      <main className="min-h-screen bg-canvas">
+        <header className="flex items-center gap-2 bg-ink px-6 py-4 text-white">
+          <SpeedIcon className="text-dial" />
+          <span className="font-semibold">ADI Check Pro</span>
+        </header>
+        <div className="mx-auto max-w-lg px-6 py-10">
+          <SkeletonRegion label="Loading your account">
+            <Skeleton className="h-7 w-52" />
+            <Skeleton className="mt-3 h-4 w-72" />
+            <Skeleton className="mt-8 h-40 rounded-2xl" />
+            <Skeleton className="mt-6 h-48 rounded-2xl" />
+          </SkeletonRegion>
+        </div>
       </main>
     );
   }

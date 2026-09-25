@@ -71,9 +71,14 @@ export default function TestsPage() {
     const token = getToken();
     if (!token) return;
 
-    await api.deleteTest(token, testId);
+    const { affectsRating } = await api.deleteTest(token, testId);
+
+    // Deleting the last row of a page would leave it empty - step back.
     if (tests.length === 1 && page > 1) setPage(page - 1);
-    refresh();
+
+    // The rows always need re-reading; the rating only when it can have moved.
+    setListKey((n) => n + 1);
+    if (affectsRating) refresh();
   }
 
   function updateFilters(next: Filters) {

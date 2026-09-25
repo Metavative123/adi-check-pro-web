@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { api, type User } from "@/lib/api";
 import { clearToken, getToken } from "@/lib/auth";
+import { AppShellSkeleton } from "@/components/Skeleton";
 
 // While redirecting we simply stay in "checking", which renders nothing but
 // the placeholder - so there is no extra state to set on the way out.
@@ -58,11 +59,7 @@ export default function RequireAuth({
   }, [router]);
 
   if (state.status !== "allowed") {
-    return (
-      <main className="flex min-h-screen items-center justify-center text-sm text-fg/60">
-        Loading...
-      </main>
-    );
+    return <AppShellSkeleton />;
   }
 
   const setUser = (user: User) => setState({ status: "allowed", user });

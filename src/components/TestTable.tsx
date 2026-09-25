@@ -7,6 +7,7 @@ import EditOutlinedIcon from "@mui/icons-material/EditOutlined";
 import PanToolOutlinedIcon from "@mui/icons-material/PanToolOutlined";
 import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutlined";
 import type { Pagination, Test } from "@/lib/api";
+import { TestRowsSkeleton } from "@/components/Skeleton";
 
 // Paginated on the server - this renders the page it is given.
 export default function TestTable({
@@ -31,10 +32,11 @@ export default function TestTable({
 
   return (
     <section className="rounded-2xl border border-line bg-surface shadow-lg shadow-shade">
-      {tests.length === 0 ? (
-        <p className="p-10 text-center text-sm text-fg/40">
-          {loading ? "Loading..." : emptyMessage}
-        </p>
+      {loading && tests.length === 0 ? (
+        // Never show "no tests" before the answer is known.
+        <TestRowsSkeleton />
+      ) : tests.length === 0 ? (
+        <p className="p-10 text-center text-sm text-fg/40">{emptyMessage}</p>
       ) : (
         <ul className={"divide-y divide-line transition-opacity " + (loading ? "opacity-50" : "")}>
           {tests.map((t) => (
