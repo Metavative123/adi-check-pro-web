@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
+import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import Avatar from "@/components/Avatar";
 import LogTestModal from "@/components/LogTestModal";
 import PerformanceCard from "@/components/PerformanceCard";
+import ReportModal from "@/components/ReportModal";
 import TestTable from "@/components/TestTable";
 import { api, type Performance, type Test } from "@/lib/api";
 import { getToken } from "@/lib/auth";
@@ -19,6 +21,7 @@ export default function DashboardPage() {
   const [performance, setPerformance] = useState<Performance | null>(null);
   const [recent, setRecent] = useState<Test[]>([]);
   const [editing, setEditing] = useState<Test | null>(null);
+  const [reportOpen, setReportOpen] = useState(false);
   // Reloads the rows without re-reading the rating, for edits that cannot
   // have changed it.
   const [listKey, setListKey] = useState(0);
@@ -66,16 +69,26 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      {/* Who */}
-      <div className="flex items-center gap-4">
-        <Avatar name={user.name} size="lg" />
-        <div>
-          <h2 className="text-xl font-semibold">{user.name}</h2>
-          <p className="text-sm text-ink/60">
-            {user.adiBadgeNumber} · {user.testCenters.length} test centre
-            {user.testCenters.length === 1 ? "" : "s"}
-          </p>
+      {/* Who, and the report export */}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <Avatar name={user.name} size="lg" />
+          <div>
+            <h2 className="text-xl font-semibold">{user.name}</h2>
+            <p className="text-sm text-ink/60">
+              {user.adiBadgeNumber} · {user.testCenters.length} test centre
+              {user.testCenters.length === 1 ? "" : "s"}
+            </p>
+          </div>
         </div>
+
+        <button
+          onClick={() => setReportOpen(true)}
+          className="flex items-center justify-center gap-2 rounded-lg border border-ink/15 bg-white px-4 py-2.5 text-sm font-medium text-ink transition hover:bg-slate-50"
+        >
+          <PictureAsPdfOutlinedIcon fontSize="small" />
+          Export PDF report
+        </button>
       </div>
 
       {/* Standing right now */}
@@ -103,6 +116,8 @@ export default function DashboardPage() {
           emptyMessage={"No tests yet. Use “Log a test” to add the first one."}
         />
       </div>
+
+      {reportOpen && <ReportModal onClose={() => setReportOpen(false)} />}
 
       {editing && (
         <LogTestModal

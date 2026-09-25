@@ -122,6 +122,82 @@ export type Billing = {
   configured: boolean;
 };
 
+// --- PDF standards report ---
+export type ReportWorking = {
+  key: string;
+  label: string;
+  meaning: string;
+  formula: string;
+  value: number;
+  unit: string;
+  decimals: number;
+  threshold: number;
+  triggerRule: string;
+  triggered: boolean;
+};
+
+export type ReportScoreRow = {
+  key: string;
+  label: string;
+  value: number;
+  unit: string;
+  threshold: number;
+  triggered: boolean;
+  severity: number;
+  points: number;
+  maxPoints: number;
+  working: string;
+};
+
+export type ReportTest = {
+  reference: string;
+  date: string;
+  // null when the instructor chose to withhold names
+  pupilName: string | null;
+  testCenter: string;
+  result: "pass" | "fail";
+  driving: number;
+  serious: number;
+  dangerous: number;
+  physicalIntervention: boolean;
+  verbalIntervention: boolean;
+};
+
+export type Report = {
+  generatedAt: string;
+  period: { from: string; to: string; label: string };
+  instructor: { name: string; adiBadgeNumber: string; testCenters: string[] };
+  namesHidden: boolean;
+  totals: {
+    tests: number;
+    passed: number;
+    failed: number;
+    driving: number;
+    serious: number;
+    dangerous: number;
+    interventions: number;
+    verbalInstructions: number;
+  };
+  metrics: Metrics;
+  triggers: string[];
+  workings: ReportWorking[];
+  score: { total: number; rows: ReportScoreRow[]; pointsPerMetric: number };
+  band: "green" | "amber" | "red";
+  hasEnoughData: boolean;
+  rules: {
+    windowMonths: number;
+    minTests: number;
+    passRateTarget: number;
+    pointsPerMetric: number;
+    redTriggers: number;
+    amberTriggers: number;
+    thresholds: Metrics;
+    metrics: { key: string; label: string; unit: string; threshold: number; rule: string }[];
+  };
+  windowNote: string;
+  tests: ReportTest[];
+};
+
 type AuthResult = { user: User; token: string };
 
 type Options = { method?: string; body?: unknown; token?: string };
@@ -227,6 +303,12 @@ export const api = {
       { token }
     );
   },
+
+  getReport: (token: string, from: string, to: string, hideNames: boolean) =>
+    request<{ report: Report }>(
+      `/tests/report?from=${from}&to=${to}${hideNames ? "&hideNames=1" : ""}`,
+      { token }
+    ),
 
   getTrend: (token: string, range: TrendRange) =>
     request<{ trend: Trend }>(`/tests/trend?range=${range}`, { token }),
