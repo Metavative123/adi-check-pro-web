@@ -8,6 +8,7 @@ import PanToolOutlinedIcon from "@mui/icons-material/PanToolOutlined";
 import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutlined";
 import type { Pagination, Test } from "@/lib/api";
 import { TestRowsSkeleton } from "@/components/Skeleton";
+import { useApp } from "@/lib/appContext";
 
 // Paginated on the server - this renders the page it is given.
 export default function TestTable({
@@ -27,6 +28,7 @@ export default function TestTable({
   onEdit: (test: Test) => void;
   emptyMessage: string;
 }) {
+  const { canWrite } = useApp();
   const from = pagination ? (pagination.page - 1) * pagination.limit + 1 : 0;
   const to = pagination ? from + tests.length - 1 : 0;
 
@@ -83,6 +85,8 @@ export default function TestTable({
                 >
                   {t.result === "pass" ? "Pass" : "Fail"}
                 </span>
+                {canWrite && (
+                  <>
                 <button
                   onClick={() => onEdit(t)}
                   className="text-fg/30 hover:text-brand"
@@ -97,6 +101,8 @@ export default function TestTable({
                 >
                   <DeleteOutlinedIcon fontSize="small" />
                 </button>
+                  </>
+                )}
               </div>
             </li>
           ))}

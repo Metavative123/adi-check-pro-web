@@ -6,6 +6,8 @@ import AppShell from "@/components/AppShell";
 import LogTestModal from "@/components/LogTestModal";
 import RequireAuth from "@/components/RequireAuth";
 import TrialBanner from "@/components/TrialBanner";
+import ReadOnlyBanner from "@/components/ReadOnlyBanner";
+import AccessLocked from "@/components/AccessLocked";
 import { AppProvider } from "@/lib/appContext";
 import { api, type Billing, type User } from "@/lib/api";
 import { getToken } from "@/lib/auth";
@@ -61,22 +63,33 @@ function Shell({
     };
   }, [refreshKey]);
 
+  // A refunded or disputed account sees nothing of its own data.
+  if (billing?.enabled && billing.access?.level === "revoked") {
+    return <AccessLocked access={billing.access} />;
+  }
+
+  // Read-only accounts keep the app but lose every control that changes data.
+  const canWrite = !billing?.enabled || billing.access?.canWrite !== false;
+
   return (
-    <AppProvider value={{ user, billing, refreshKey, refresh, setUser }}>
+    <AppProvider value={{ user, billing, canWrite, refreshKey, refresh, setUser }}>
       <AppShell
         user={user}
         showBilling={billing?.enabled ?? false}
         action={
-          <button
-            onClick={() => setModalOpen(true)}
-            className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark"
-          >
-            <AddIcon fontSize="small" />
-            <span className="hidden sm:inline">Log a test</span>
-          </button>
+          canWrite ? (
+            <button
+              onClick={() => setModalOpen(true)}
+              className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark"
+            >
+              <AddIcon fontSize="small" />
+              <span className="hidden sm:inline">Log a test</span>
+            </button>
+          ) : null
         }
       >
         <TrialBanner />
+        <ReadOnlyBanner />
         {children}
       </AppShell>
 

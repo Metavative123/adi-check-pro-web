@@ -2,20 +2,14 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import CheckIcon from "@mui/icons-material/Check";
-import CreditCardOutlinedIcon from "@mui/icons-material/CreditCardOutlined";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
-import { api, type Billing } from "@/lib/api";
+import PlanCards from "@/components/PlanCards";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import { api, type Billing, type Payment, type Plan } from "@/lib/api";
+import { formatMoney } from "@/lib/money";
 import { getToken } from "@/lib/auth";
 import { useApp } from "@/lib/appContext";
 import { Skeleton, SkeletonRegion } from "@/components/Skeleton";
-
-const FEATURES = [
-  "Unlimited test logging",
-  "12-month performance rating",
-  "Pass-rate and fault trends",
-  "Search and filter every test",
-];
 
 const LABELS: Record<Billing["status"], string> = {
   trialing: "Free trial",
@@ -42,7 +36,9 @@ function BillingContent() {
   const returningFromCheckout = params.get("checkout") === "success";
 
   const [billing, setBilling] = useState<Billing | null>(null);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [busy, setBusy] = useState(false);
+  const [busyPlanId, setBusyPlanId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loadKey, setLoadKey] = useState(0);
 
@@ -54,8 +50,13 @@ function BillingContent() {
 
     async function load(authToken: string) {
       try {
-        const { billing: data } = await api.getBilling(authToken, true);
-        if (!cancelled) setBilling(data);
+        const [{ billing: data }, history] = await Promise.all([
+          api.getBilling(authToken, true),
+          api.listPayments(authToken).catch(() => ({ payments: [] })),
+        ]);
+        if (cancelled) return;
+        setBilling(data);
+        setPayments(history.payments);
       } catch (err) {
         if (!cancelled) setError(err instanceof Error ? err.message : "Could not load billing");
       }
@@ -67,23 +68,24 @@ function BillingContent() {
     };
   }, [loadKey]);
 
-  async function upgrade() {
+  async function choosePlan(planId: Plan["id"]) {
     const token = getToken();
     if (!token) return;
 
-    setBusy(true);
+    setBusyPlanId(planId);
     setError("");
     try {
       const origin = window.location.origin;
       const { url } = await api.startCheckout(
         token,
-        `${origin}/billing?checkout=success`,
+        planId,
+        `${origin}/checkout/complete?session_id={CHECKOUT_SESSION_ID}`,
         `${origin}/billing?checkout=cancelled`
       );
       window.location.href = url; // Stripe-hosted checkout
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not start checkout");
-      setBusy(false);
+      setBusyPlanId(null);
     }
   }
 
@@ -142,7 +144,6 @@ function BillingContent() {
 
   const onTrial = billing.status === "trialing";
   const subscribed = billing.status === "active";
-  const expired = !billing.hasAccess;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
@@ -189,10 +190,15 @@ function BillingContent() {
           {onTrial && !billing.hasAccess && (
             <>Your free trial has ended. Subscribe to keep logging tests.</>
           )}
-          {subscribed && billing.currentPeriodEnd && (
+          {subscribed && (billing.accessEndsAt || billing.currentPeriodEnd) && (
             <>
               {billing.cancelAtPeriodEnd ? "Access ends " : "Renews "}
-              {new Date(billing.currentPeriodEnd).toLocaleDateString("en-GB")}.
+              {new Date(
+                billing.accessEndsAt || (billing.currentPeriodEnd as string)
+              ).toLocaleDateString("en-GB")}
+              .
+              {billing.cancelAtPeriodEnd &&
+                " Your plan will not renew, and nothing is charged again."}
             </>
           )}
           {billing.status === "past_due" && (
@@ -204,40 +210,31 @@ function BillingContent() {
         </p>
       </section>
 
-      {/* Plan on offer */}
-      {!subscribed && (
-        <section className="rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
-          <div className="flex items-baseline gap-2">
-            <h2 className="text-lg font-semibold">Pro</h2>
-            <p className="text-2xl font-semibold">£19</p>
-            <p className="text-sm text-fg/50">per month</p>
-          </div>
+      {/* The plans. Shown whatever the current state, so a subscriber can
+          move between them and a trial user can start paying. */}
+      <section>
+        <h2 className="mb-1 font-semibold">
+          {subscribed ? "Change plan" : "Plans"}
+        </h2>
+        <p className="mb-4 text-sm text-fg/60">
+          Longer plans cost less per month. Prices include everything.
+        </p>
 
-          <ul className="mt-4 space-y-2">
-            {FEATURES.map((feature) => (
-              <li key={feature} className="flex items-center gap-2 text-sm text-fg/70">
-                <CheckIcon sx={{ fontSize: 16 }} className="text-brand" />
-                {feature}
-              </li>
-            ))}
-          </ul>
+        <PlanCards
+          plans={billing.plans}
+          currentPlanId={billing.planId}
+          busyPlanId={busyPlanId}
+          onChoose={choosePlan}
+          ctaLabel={subscribed ? "Switch to" : "Pay"}
+        />
 
-          <button
-            onClick={upgrade}
-            disabled={busy || !billing.configured}
-            className="mt-6 flex w-full items-center justify-center gap-2 rounded-lg bg-brand py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
-          >
-            <CreditCardOutlinedIcon fontSize="small" />
-            {busy ? "Opening Stripe..." : expired ? "Subscribe now" : "Upgrade to Pro"}
-          </button>
-
-          {!billing.configured && (
-            <p className="mt-2 text-xs text-fg/50">
-              Billing is not configured on the server yet.
-            </p>
-          )}
-        </section>
-      )}
+        {subscribed && (
+          <p className="mt-3 text-xs text-fg/50">
+            Switching plans is handled by Stripe, which adjusts what you owe for
+            the time already paid for.
+          </p>
+        )}
+      </section>
 
       {/* Manage an existing subscription */}
       {billing.hasBillingAccount && (
@@ -248,11 +245,69 @@ function BillingContent() {
           </p>
           <button
             onClick={manage}
-            disabled={busy}
+            disabled={busy || Boolean(busyPlanId)}
             className="mt-4 rounded-lg border border-line px-4 py-2 text-sm font-medium text-fg transition hover:bg-raised disabled:opacity-60"
           >
             Open billing portal
           </button>
+        </section>
+      )}
+
+      {/* What has actually been charged, from the payments collection. */}
+      {payments.length > 0 && (
+        <section className="rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">
+          <div className="mb-4 flex items-center gap-2">
+            <ReceiptLongOutlinedIcon className="text-brand" fontSize="small" />
+            <h2 className="font-semibold">Payment history</h2>
+          </div>
+
+          <ul className="divide-y divide-line">
+            {payments.map((payment) => (
+              <li
+                key={payment._id}
+                className="flex items-center justify-between gap-3 py-2.5"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium">
+                    {payment.description || "Subscription"}
+                  </p>
+                  <p className="text-xs text-fg/50">
+                    {payment.paidAt
+                      ? new Date(payment.paidAt).toLocaleDateString("en-GB")
+                      : "Pending"}
+                    {payment.periodEnd &&
+                      ` · covers to ${new Date(payment.periodEnd).toLocaleDateString("en-GB")}`}
+                  </p>
+                </div>
+
+                <div className="flex shrink-0 items-center gap-3">
+                  <span className="text-sm font-semibold tabular-nums">
+                    {formatMoney(payment.amount, payment.currency)}
+                  </span>
+                  <span
+                    className={
+                      "rounded-full px-2 py-0.5 text-[11px] font-semibold " +
+                      (payment.status === "paid"
+                        ? "bg-brand-light text-brand-fg"
+                        : "bg-danger-bg text-danger-fg")
+                    }
+                  >
+                    {payment.status}
+                  </span>
+                  {payment.receiptUrl && (
+                    <a
+                      href={payment.receiptUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-medium text-brand hover:underline"
+                    >
+                      Receipt
+                    </a>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

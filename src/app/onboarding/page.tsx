@@ -219,7 +219,7 @@ export default function OnboardingPage() {
         {error && <p className="mt-4 text-sm text-danger">{error}</p>}
 
         <div className="mt-8">
-          <Button onClick={() => router.push("/dashboard")} disabled={!ready}>
+          <Button onClick={() => router.push("/choose-plan")} disabled={!ready}>
             {ready ? "Go to dashboard" : "Add a badge number and one centre"}
           </Button>
         </div>

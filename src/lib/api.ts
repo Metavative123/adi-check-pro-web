@@ -11,6 +11,10 @@ export type User = {
   adiBadgeNumber?: string;
   testCenters: TestCenter[];
   profileComplete: boolean;
+  // Set when the instructor still has to choose a trial or a plan.
+  needsPlanChoice?: boolean;
+  subscription?: { planSelected?: boolean; planId?: string; status?: string };
+  access?: Access;
 };
 
 export type Test = {
@@ -106,7 +110,55 @@ export type Pagination = {
   hasMore: boolean;
 };
 
+export type Plan = {
+  id: "monthly" | "sixmonth" | "yearly";
+  name: string;
+  blurb: string;
+  months: number;
+  amount: number; // smallest currency unit, e.g. 1900 = GBP 19.00
+  perMonth: number;
+  fullPrice: number; // what the same months would cost monthly
+  saving: number;
+  savingPercent: number;
+  hasDiscount: boolean;
+  currency: string;
+  configured: boolean;
+};
+
+export type Payment = {
+  _id: string;
+  stripeInvoiceId: string;
+  planId?: string;
+  description?: string;
+  amount: number;
+  currency: string;
+  status: "paid" | "failed" | "open" | "refunded" | "void";
+  periodStart?: string;
+  periodEnd?: string;
+  paidAt?: string;
+  receiptUrl?: string;
+  invoiceUrl?: string;
+};
+
+// full = read and write · read_only = view and export only · revoked = nothing
+export type Access = {
+  level: "full" | "read_only" | "revoked";
+  reason: string;
+  message?: string;
+  canRead: boolean;
+  canWrite: boolean;
+  revokedAt?: string;
+};
+
 export type Billing = {
+  access: Access;
+  trialCancelled: boolean;
+  plans: Plan[];
+  trialDays: number;
+  // False until the instructor has picked a trial or a paid plan.
+  planSelected: boolean;
+  planId: string | null;
+  needsPlanChoice: boolean;
   // false = billing is switched off on the server; nothing is paywalled.
   enabled: boolean;
   status: "trialing" | "active" | "past_due" | "canceled" | "incomplete" | "none";
@@ -115,6 +167,9 @@ export type Billing = {
   trialDaysLeft: number;
   currentPeriodEnd?: string;
   cancelAtPeriodEnd: boolean;
+  // The day access actually ends when a cancellation is pending. Use this
+  // rather than currentPeriodEnd: a cancellation can be set for a custom date.
+  accessEndsAt?: string;
   // True while the account may use the paid features.
   hasAccess: boolean;
   hasBillingAccount: boolean;
@@ -290,12 +345,44 @@ export const api = {
   getBilling: (token: string, sync = false) =>
     request<{ billing: Billing }>(`/billing${sync ? "?sync=1" : ""}`, { token }),
 
-  startCheckout: (token: string, successUrl: string, cancelUrl: string) =>
-    request<{ url: string }>("/billing/checkout", {
-      method: "POST",
-      body: { successUrl, cancelUrl },
+  // Applies the subscription the moment the customer returns from Stripe,
+  // rather than waiting for the webhook.
+  confirmCheckout: (token: string, sessionId: string) =>
+    request<{ applied: boolean; status: string; billing: Billing }>(
+      "/billing/checkout/confirm",
+      { method: "POST", body: { sessionId }, token }
+    ),
+
+  listPayments: (token: string) =>
+    request<{ payments: Payment[] }>("/billing/payments", { token }),
+
+  getPlans: (token: string) =>
+    request<{ plans: Plan[]; trialDays: number; currency: string }>("/billing/plans", {
       token,
     }),
+
+  // Taking the trial needs no card and never touches Stripe.
+  chooseTrial: (token: string) =>
+    request<{ user: User }>("/billing/trial", { method: "POST", token }),
+
+  startCheckout: (
+    token: string,
+    planId: Plan["id"],
+    successUrl: string,
+    cancelUrl: string
+  ) =>
+    request<{ url: string; plan: string }>("/billing/checkout", {
+      method: "POST",
+      body: { planId, successUrl, cancelUrl },
+      token,
+    }),
+
+  // Cancelling keeps whatever was already paid for.
+  cancelSubscription: (token: string) =>
+    request<{ cancelled: boolean; keepsAccessUntil?: string; message: string; billing: Billing }>(
+      "/billing/cancel",
+      { method: "POST", token }
+    ),
 
   openBillingPortal: (token: string, returnUrl: string) =>
     request<{ url: string }>("/billing/portal", {

@@ -43,6 +43,13 @@ export default function RequireAuth({
           return;
         }
 
+        // Profile done, but no trial or plan picked yet - including on
+        // accounts that existed before plans were introduced.
+        if (user.needsPlanChoice) {
+          router.replace("/choose-plan");
+          return;
+        }
+
         setState({ status: "allowed", user });
       } catch {
         // Expired or rejected token - clear it and start again.

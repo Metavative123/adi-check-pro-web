@@ -8,6 +8,8 @@ type AppContextValue = {
   // null until loaded. `enabled: false` means billing is switched off.
   billing: Billing | null;
   // Pages put this in their effect dependencies; bumping it reloads their data.
+  // False when the account is read only, so controls that change data can hide.
+  canWrite: boolean;
   refreshKey: number;
   refresh: () => void;
   setUser: (user: User) => void;
