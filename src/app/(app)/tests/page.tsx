@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import CloseIcon from "@mui/icons-material/Close";
+import ComparePupilsModal from "@/components/ComparePupilsModal";
 import LogTestModal from "@/components/LogTestModal";
 import TestTable from "@/components/TestTable";
 import TestFilters, { EMPTY_FILTERS, type Filters } from "@/components/TestFilters";
@@ -20,6 +22,7 @@ export default function TestsPage() {
   const [page, setPage] = useState(1);
 
   const [editing, setEditing] = useState<Test | null>(null);
+  const [comparing, setComparing] = useState(false);
   // Reloads the rows without re-reading the rating, for edits that cannot
   // have changed it.
   const [listKey, setListKey] = useState(0);
@@ -114,7 +117,17 @@ export default function TestsPage() {
           )}
         </div>
 
-        <TestFilters value={filters} onChange={updateFilters} />
+        <div className="mt-3 flex flex-wrap items-end justify-between gap-3">
+          <TestFilters value={filters} onChange={updateFilters} />
+
+          <button
+            onClick={() => setComparing(true)}
+            className="flex items-center gap-2 rounded-lg border border-line px-3 py-2 text-xs font-medium text-fg transition hover:bg-raised"
+          >
+            <CompareArrowsIcon fontSize="small" />
+            Compare pupils
+          </button>
+        </div>
 
         {(searchInput || activeCount > 0) && (
           <div className="mt-3 flex items-center justify-between border-t border-line pt-3">
@@ -146,6 +159,8 @@ export default function TestsPage() {
             : "No tests yet. Use “Log a test” to add the first one."
         }
       />
+
+      {comparing && <ComparePupilsModal onClose={() => setComparing(false)} />}
 
       {editing && (
         <LogTestModal

@@ -8,11 +8,14 @@ export default function Modal({
   open,
   onClose,
   title,
+  size = "md",
   children,
 }: {
   open: boolean;
   onClose: () => void;
   title: string;
+  // "lg" is for content that needs two columns, like the pupil comparison.
+  size?: "md" | "lg";
   children: React.ReactNode;
 }) {
   useEffect(() => {
@@ -42,7 +45,10 @@ export default function Modal({
       aria-label={title}
     >
       <div
-        className="max-h-[92vh] w-full max-w-lg animate-fade-up overflow-y-auto rounded-t-2xl bg-surface shadow-xl sm:rounded-2xl"
+        className={
+          "max-h-[92vh] w-full animate-fade-up overflow-y-auto rounded-t-2xl bg-surface shadow-xl sm:rounded-2xl " +
+          (size === "lg" ? "max-w-3xl" : "max-w-lg")
+        }
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-line px-6 py-4">

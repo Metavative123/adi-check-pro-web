@@ -198,6 +198,34 @@ export type Report = {
   tests: ReportTest[];
 };
 
+// --- pupils (a pupil is a distinct name across the instructor's tests) ---
+export type PupilRef = {
+  name: string;
+  tests: number;
+  lastTestDate: string;
+  // Set when the search term matched a test reference rather than a name.
+  matchedReference?: string;
+};
+
+export type PupilSummary = {
+  name: string;
+  totals: {
+    tests: number;
+    passed: number;
+    failed: number;
+    driving: number;
+    serious: number;
+    dangerous: number;
+    interventions: number;
+    verbalInstructions: number;
+  };
+  metrics: Metrics;
+  firstTestDate: string;
+  lastTestDate: string;
+  testCenters: string[];
+  tests: Test[];
+};
+
 type AuthResult = { user: User; token: string };
 
 type Options = { method?: string; body?: unknown; token?: string };
@@ -307,6 +335,20 @@ export const api = {
   getReport: (token: string, from: string, to: string, hideNames: boolean) =>
     request<{ report: Report }>(
       `/tests/report?from=${from}&to=${to}${hideNames ? "&hideNames=1" : ""}`,
+      { token }
+    ),
+
+  // Searches every test, not just the page on screen, so a pupil buried deep
+  // in the history is still reachable. Matches a pupil name or a test id.
+  listPupils: (token: string, search: string, limit = 8) =>
+    request<{ pupils: PupilRef[] }>(
+      `/tests/pupils?limit=${limit}${search ? `&search=${encodeURIComponent(search)}` : ""}`,
+      { token }
+    ),
+
+  getPupilSummary: (token: string, name: string) =>
+    request<{ summary: PupilSummary }>(
+      `/tests/pupils/summary?name=${encodeURIComponent(name)}`,
       { token }
     ),
 
