@@ -46,6 +46,8 @@ export type Performance = {
   windowMonths: number;
   // Oldest test date still counted. Tests drop off 12 months after their date.
   windowStart?: string;
+  // Pass rate that earns full marks. The gauge is green from here up.
+  passRateTarget?: number;
   total: number;
   passed: number;
   minTests: number;

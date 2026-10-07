@@ -51,6 +51,7 @@ export default function PerformanceCard({ performance }: { performance: Performa
     total,
     minTests,
     windowStart,
+    passRateTarget = 70,
   } = performance;
 
   const triggered = (key: keyof Metrics) => triggers.includes(key);
@@ -96,7 +97,13 @@ export default function PerformanceCard({ performance }: { performance: Performa
 
       {/* Pass rate on the dial */}
       <div className="flex flex-col items-center rounded-2xl border border-line bg-ink p-6 text-white shadow-lg shadow-shade">
-        <Gauge value={metrics.passRate} className="w-32" />
+        {/* Red up to the trigger, orange up to the target, green beyond. */}
+        <Gauge
+          value={metrics.passRate}
+          zones={[thresholds.passRate, passRateTarget]}
+          className="w-32"
+          label={`Pass rate ${metrics.passRate}%`}
+        />
         <p className="mt-2 text-sm text-white/70">Pass rate</p>
         <p className="text-2xl font-semibold">{metrics.passRate}%</p>
         <p className="mt-1 text-xs text-white/40">
