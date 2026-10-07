@@ -34,6 +34,8 @@ export type Test = {
 export type Metrics = {
   drivingFaultAverage: number;
   seriousFaultAverage: number;
+  // Information only: no threshold and no trigger, so thresholds omit it.
+  dangerousFaultAverage?: number;
   physicalInterventionRate: number;
   passRate: number;
 };

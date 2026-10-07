@@ -40,6 +40,12 @@ const ROWS: Row[] = [
     better: "lower",
   },
   {
+    label: "Dangerous fault average",
+    value: (s) => s.metrics.dangerousFaultAverage ?? 0,
+    format: (n) => n.toFixed(2),
+    better: "lower",
+  },
+  {
     label: "Dangerous faults",
     value: (s) => s.totals.dangerous,
     format: String,

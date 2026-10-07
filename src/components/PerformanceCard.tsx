@@ -104,7 +104,7 @@ export default function PerformanceCard({ performance }: { performance: Performa
         </p>
       </div>
 
-      {/* The three averages */}
+      {/* The averages */}
       <div className="grid gap-4">
         <MetricRow
           label="Driving fault average"
@@ -117,6 +117,12 @@ export default function PerformanceCard({ performance }: { performance: Performa
           value={metrics.seriousFaultAverage.toFixed(2)}
           threshold={"triggers at " + thresholds.seriousFaultAverage + "+"}
           triggered={triggered("seriousFaultAverage")}
+        />
+        <MetricRow
+          label="Dangerous fault average"
+          value={(metrics.dangerousFaultAverage ?? 0).toFixed(2)}
+          threshold="for information · no trigger"
+          triggered={false}
         />
         <MetricRow
           label="Physical intervention"
