@@ -40,6 +40,8 @@ export type Metrics = {
 
 export type Performance = {
   windowMonths: number;
+  // Oldest test date still counted. Tests drop off 12 months after their date.
+  windowStart?: string;
   total: number;
   passed: number;
   minTests: number;

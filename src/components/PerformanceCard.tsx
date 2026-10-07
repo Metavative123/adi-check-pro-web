@@ -30,9 +30,28 @@ function TrafficLight({ band, lit }: { band: Performance["band"]; lit: boolean }
   );
 }
 
+// "8 Oct 2025". Test dates are whole days stored at 00:00 UTC.
+function formatDay(value: string) {
+  return new Date(value).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+}
+
 export default function PerformanceCard({ performance }: { performance: Performance }) {
-  const { metrics, thresholds, triggers, score, band, hasEnoughData, total, minTests } =
-    performance;
+  const {
+    metrics,
+    thresholds,
+    triggers,
+    score,
+    band,
+    hasEnoughData,
+    total,
+    minTests,
+    windowStart,
+  } = performance;
 
   const triggered = (key: keyof Metrics) => triggers.includes(key);
 
@@ -64,6 +83,13 @@ export default function PerformanceCard({ performance }: { performance: Performa
         ) : (
           <p className="mt-4 text-sm text-white/60">
             Rating starts at {minTests} tests. {total} logged in the last 12 months.
+          </p>
+        )}
+
+        {windowStart && (
+          <p className="mt-2 text-xs text-white/40">
+            Counting tests from {formatDay(windowStart)} · each drops off 12 months after its
+            test date
           </p>
         )}
       </div>
