@@ -36,6 +36,8 @@ export type Metrics = {
   seriousFaultAverage: number;
   // Information only: no threshold and no trigger, so thresholds omit it.
   dangerousFaultAverage?: number;
+  // Serious + dangerous per test. Information only, like dangerous.
+  seriousDangerousFaultAverage?: number;
   physicalInterventionRate: number;
   passRate: number;
 };

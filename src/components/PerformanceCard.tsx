@@ -125,6 +125,12 @@ export default function PerformanceCard({ performance }: { performance: Performa
           triggered={false}
         />
         <MetricRow
+          label="Serious + dangerous average"
+          value={(metrics.seriousDangerousFaultAverage ?? 0).toFixed(2)}
+          threshold="fail-level faults per test · for information · no trigger"
+          triggered={false}
+        />
+        <MetricRow
           label="Physical intervention"
           value={metrics.physicalInterventionRate + "%"}
           threshold={"triggers at " + thresholds.physicalInterventionRate + "%+"}

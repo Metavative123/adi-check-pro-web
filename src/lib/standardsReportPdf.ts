@@ -262,6 +262,12 @@ export async function downloadStandardsReport(report: Report) {
         "Dangerous fault average",
         (report.metrics.dangerousFaultAverage ?? 0).toFixed(2),
       ],
+      [
+        "Serious + dangerous average",
+        (report.metrics.seriousDangerousFaultAverage ?? 0).toFixed(2),
+        "",
+        "",
+      ],
     ],
     styles: { fontSize: 8, cellPadding: 2, lineColor: LINE, lineWidth: 0.1 },
     // 44+16+44+16 = 120mm, comfortably inside the 182mm available.
