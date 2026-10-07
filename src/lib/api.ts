@@ -119,18 +119,33 @@ export type Pagination = {
 };
 
 export type Plan = {
-  id: "monthly" | "sixmonth" | "yearly";
+  id: "founding" | "monthly" | "sixmonth" | "yearly";
   name: string;
   blurb: string;
   months: number;
-  amount: number; // smallest currency unit, e.g. 1900 = GBP 19.00
+  amount: number; // smallest currency unit, e.g. 999 = GBP 9.99
   perMonth: number;
   fullPrice: number; // what the same months would cost monthly
   saving: number;
   savingPercent: number;
   hasDiscount: boolean;
+  // Saving in whole months of the monthly price (1 = "one month free").
+  freeMonths?: number;
+  // The founding member offer: first 50 members only.
+  founding?: boolean;
   currency: string;
   configured: boolean;
+};
+
+// The founding member countdown. `place` is this user's place, if they took one.
+export type FoundingCount = {
+  limit: number;
+  taken: number;
+  left: number;
+  place?: number | null;
+  // The founding price, on the public count only.
+  amount?: number;
+  currency?: string;
 };
 
 export type Payment = {
@@ -162,6 +177,7 @@ export type Billing = {
   access: Access;
   trialCancelled: boolean;
   plans: Plan[];
+  founding?: FoundingCount;
   trialDays: number;
   // False until the instructor has picked a trial or a paid plan.
   planSelected: boolean;
@@ -365,9 +381,13 @@ export const api = {
     request<{ payments: Payment[] }>("/billing/payments", { token }),
 
   getPlans: (token: string) =>
-    request<{ plans: Plan[]; trialDays: number; currency: string }>("/billing/plans", {
-      token,
-    }),
+    request<{ plans: Plan[]; trialDays: number; currency: string; founding?: FoundingCount }>(
+      "/billing/plans",
+      { token }
+    ),
+
+  // Public: how many founding places are left, for the sign-up page.
+  getFoundingCount: () => request<{ founding: FoundingCount }>("/billing/founding"),
 
   // Taking the trial needs no card and never touches Stripe.
   chooseTrial: (token: string) =>

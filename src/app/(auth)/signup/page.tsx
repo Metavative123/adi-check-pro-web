@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PersonOutlinedIcon from "@mui/icons-material/PersonOutlined";
@@ -11,7 +11,9 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import AuthLayout from "@/components/AuthLayout";
 import Field from "@/components/Field";
 import Button from "@/components/Button";
-import { api } from "@/lib/api";
+import FoundingCountdown from "@/components/FoundingCountdown";
+import { formatMoney } from "@/lib/money";
+import { api, type FoundingCount } from "@/lib/api";
 import { saveToken } from "@/lib/auth";
 
 export default function SignUpPage() {
@@ -23,6 +25,15 @@ export default function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [founding, setFounding] = useState<FoundingCount | null>(null);
+
+  // The founding countdown. If it cannot be loaded the page simply goes without.
+  useEffect(() => {
+    api
+      .getFoundingCount()
+      .then(({ founding }) => setFounding(founding))
+      .catch(() => {});
+  }, []);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -49,6 +60,20 @@ export default function SignUpPage() {
       title="Create account"
       subtitle="Set up your ADI Check Pro account in a minute."
     >
+      {founding && founding.left > 0 && (
+        <div className="mb-5 rounded-xl border border-dial/60 bg-dial/10 p-3">
+          <p className="text-sm">
+            <span className="font-semibold">
+              Founding members pay{" "}
+              {founding.amount ? formatMoney(founding.amount, founding.currency || "gbp") : "less"} a
+              month
+            </span>
+            <span className="text-fg/60"> for as long as they stay subscribed.</span>
+          </p>
+          <FoundingCountdown founding={founding} className="mt-2" />
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <Field
           label="Full name"

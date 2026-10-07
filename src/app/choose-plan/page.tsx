@@ -158,6 +158,7 @@ export default function ChoosePlanPage() {
 
             <PlanCards
               plans={billing.plans}
+              founding={billing.founding}
               busyPlanId={busyPlanId}
               onChoose={pay}
               ctaLabel="Pay"

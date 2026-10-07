@@ -222,6 +222,7 @@ function BillingContent() {
 
         <PlanCards
           plans={billing.plans}
+          founding={billing.founding}
           currentPlanId={billing.planId}
           busyPlanId={busyPlanId}
           onChoose={choosePlan}
