@@ -52,6 +52,7 @@ export default function PerformanceCard({ performance }: { performance: Performa
     minTests,
     windowStart,
     passRateTarget = 70,
+    standardsCheckAt = 3,
   } = performance;
 
   const triggered = (key: keyof Metrics) => triggers.includes(key);
@@ -62,30 +63,28 @@ export default function PerformanceCard({ performance }: { performance: Performa
       <div className="rounded-2xl border border-line bg-ink p-6 text-white shadow-lg shadow-shade">
         <div className="flex items-start justify-between">
           <div>
-            <p className="text-sm text-white/60">Overall score</p>
+            <p className="text-sm text-white/60">ADI Check Pro performance score</p>
             <p className="text-4xl font-semibold">
               {score}
               <span className="text-lg text-white/40">/100</span>
+            </p>
+            <p className="mt-1 text-[11px] text-white/40">
+              Rolling 12 months · worked out by this app, not a DVSA score
             </p>
           </div>
           <TrafficLight band={band} lit={hasEnoughData} />
         </div>
 
         {hasEnoughData ? (
-          <p className={"mt-4 text-sm font-medium " + BANDS[band].text}>
-            {BANDS[band].label}
-            <span className="font-normal text-white/50">
-              {" · "}
-              {triggers.length === 0
-                ? "no triggers"
-                : triggers.length + (triggers.length === 1 ? " trigger" : " triggers")}
-            </span>
-          </p>
+          <p className={"mt-4 text-sm font-medium " + BANDS[band].text}>{BANDS[band].label}</p>
         ) : (
           <p className="mt-4 text-sm text-white/60">
             Rating starts at {minTests} tests. {total} logged in the last 12 months.
           </p>
         )}
+
+        {/* Shown whether or not there are enough tests for a colour. */}
+        <TriggerSummary count={triggers.length} checkAt={standardsCheckAt} />
 
         {windowStart && (
           <p className="mt-2 text-xs text-white/40">
@@ -145,6 +144,25 @@ export default function PerformanceCard({ performance }: { performance: Performa
         />
       </div>
     </section>
+  );
+}
+
+// "1 of 4 triggers · a standards check is only flagged at 3 or more".
+function TriggerSummary({ count, checkAt }: { count: number; checkAt: number }) {
+  const atRisk = count >= checkAt;
+  return (
+    <div className="mt-3 rounded-lg bg-white/5 px-3 py-2">
+      <p className="text-sm">
+        <span className={"font-semibold " + (atRisk ? "text-red-400" : "text-white")}>
+          {count} of 4 triggers
+        </span>
+      </p>
+      <p className="text-xs text-white/50">
+        {atRisk
+          ? `At ${checkAt} or more triggers a DVSA standards check is likely.`
+          : `A DVSA standards check is only flagged at ${checkAt} or more.`}
+      </p>
+    </div>
   );
 }
 

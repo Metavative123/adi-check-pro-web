@@ -10,7 +10,7 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "ADI Check Pro",
-  description: "Driver and Vehicle Standards checks for driving instructors",
+  description: "Test performance tracking for driving instructors",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

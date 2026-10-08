@@ -11,23 +11,38 @@ import { getToken } from "@/lib/auth";
 const inputClass =
   "w-full rounded-lg border border-line bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20";
 
-// Handy starting points, so the common cases are one click.
-function monthsAgo(months: number) {
-  const date = new Date();
-  date.setMonth(date.getMonth() - months);
-  return date.toISOString().slice(0, 10);
+// Today's date in the UK, as YYYY-MM-DD - the same day the API works in.
+function ukToday() {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Europe/London",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(new Date());
+}
+
+// The first day of a period of `months` months ending on `to`, matching the
+// dashboard's rolling window: 12 months to 7 Oct 2026 starts 8 Oct 2025.
+function periodStart(to: string, months: number) {
+  const [year, month, day] = to.split("-").map(Number);
+  const start = new Date(Date.UTC(year, month - 1 - months, 1));
+  const daysInMonth = new Date(
+    Date.UTC(start.getUTCFullYear(), start.getUTCMonth() + 1, 0)
+  ).getUTCDate();
+  start.setUTCDate(Math.min(day, daysInMonth) + 1);
+  return start.toISOString().slice(0, 10);
 }
 
 const PRESETS = [
   { label: "Last 3 months", months: 3 },
   { label: "Last 6 months", months: 6 },
-  { label: "Last 12 months", months: 12 },
+  { label: "Last 12 months (same as dashboard)", months: 12 },
 ];
 
 export default function ReportModal({ onClose }: { onClose: () => void }) {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = ukToday();
 
-  const [from, setFrom] = useState(monthsAgo(12));
+  const [from, setFrom] = useState(periodStart(today, 12));
   const [to, setTo] = useState(today);
   // Deliberately a required decision rather than a buried default.
   const [hideNames, setHideNames] = useState(false);
@@ -63,7 +78,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Modal open onClose={onClose} title="Export standards report">
+    <Modal open onClose={onClose} title="Export performance report">
       <div className="space-y-5">
         <p className="text-sm text-fg/60">
           A PDF of every test in the period, with the calculation behind each figure
@@ -76,7 +91,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
               key={preset.label}
               type="button"
               onClick={() => {
-                setFrom(monthsAgo(preset.months));
+                setFrom(periodStart(today, preset.months));
                 setTo(today);
               }}
               className="rounded-lg border border-line px-3 py-1.5 text-xs font-medium text-fg/70 transition hover:bg-raised"
@@ -143,6 +158,14 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
             </div>
           </div>
         </div>
+
+        <p className="text-xs text-fg/50">
+          {from === periodStart(today, 12) && to === today
+            ? "This is the same 12 months as your dashboard, so the figures will match."
+            : from === periodStart(to, 12)
+              ? "Exactly 12 months. Figures will match the dashboard only if it ends today."
+              : "Every figure in the PDF is for this period, so it can differ from the dashboard's rolling 12 months."}
+        </p>
 
         {error && <p className="text-sm text-danger">{error}</p>}
 

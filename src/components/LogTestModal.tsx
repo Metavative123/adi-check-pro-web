@@ -9,6 +9,7 @@ import Modal from "@/components/Modal";
 import Button from "@/components/Button";
 import { api, type Test, type User } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import { interventionWarning, resultProblem } from "@/lib/testRules";
 
 const STEPS = ["Pupil", "Result", "Faults", "Review"];
 
@@ -91,6 +92,10 @@ export default function LogTestModal({
       if (!form.centerId) return "Choose a test centre";
     }
     if (current === 2 && !form.result) return "Choose pass or fail";
+    if (current >= 3) {
+      const problem = resultProblem(form.result, form);
+      if (problem) return problem;
+    }
     return "";
   }
 
@@ -112,6 +117,12 @@ export default function LogTestModal({
   async function submit() {
     const token = getToken();
     if (!token) return;
+
+    const problem = validate(3);
+    if (problem) {
+      setError(problem);
+      return;
+    }
 
     setSaving(true);
     setError("");
@@ -235,10 +246,19 @@ export default function LogTestModal({
               onChange={(v) => set("physicalIntervention", v)}
             />
             <YesNo
-              label="Verbal instruction"
+              label="Verbal intervention"
               value={form.verbalIntervention}
               onChange={(v) => set("verbalIntervention", v)}
             />
+            <p className="text-xs text-fg/50">
+              Physical intervention counts towards your rating. Verbal intervention is recorded
+              for your records only.
+            </p>
+            {interventionWarning(form.physicalIntervention, form.verbalIntervention, form) && (
+              <p className="rounded-lg bg-dial/10 px-3 py-2 text-xs text-fg/80">
+                {interventionWarning(form.physicalIntervention, form.verbalIntervention, form)}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -268,7 +288,7 @@ export default function LogTestModal({
               value={form.physicalIntervention ? "Yes" : "No"}
             />
             <Row
-              label="Verbal instruction"
+              label="Verbal intervention"
               value={form.verbalIntervention ? "Yes" : "No"}
             />
           </ReviewGroup>

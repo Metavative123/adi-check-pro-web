@@ -24,11 +24,11 @@ export default function AuthLayout({
 
         <div className="max-w-md">
           <h2 className="text-2xl font-semibold md:text-3xl">
-            Driver and Vehicle Standards, at a glance.
+            Your test performance, at a glance.
           </h2>
           <p className="mt-3 text-sm text-white/70">
-            Track instructor checks, vehicle records and standards scores in one
-            dashboard.
+            Log your pupils&apos; test results and see your pass rate, faults and
+            triggers over a rolling 12 months.
           </p>
         </div>
       </section>

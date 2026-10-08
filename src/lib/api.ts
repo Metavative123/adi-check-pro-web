@@ -48,6 +48,8 @@ export type Performance = {
   windowStart?: string;
   // Pass rate that earns full marks. The gauge is green from here up.
   passRateTarget?: number;
+  // Triggers at which a DVSA standards check is likely (the red line).
+  standardsCheckAt?: number;
   total: number;
   passed: number;
   minTests: number;
@@ -244,7 +246,16 @@ export type ReportTest = {
 
 export type Report = {
   generatedAt: string;
-  period: { from: string; to: string; label: string };
+  period: {
+    from: string;
+    to: string;
+    label: string;
+    // Exactly 12 months ending on "to" - the app's standard window.
+    isStandardWindow?: boolean;
+    // ...and ending today, so the figures match the dashboard.
+    matchesDashboard?: boolean;
+    windowMonths?: number;
+  };
   instructor: { name: string; adiBadgeNumber: string; testCenters: string[] };
   namesHidden: boolean;
   totals: {
@@ -269,11 +280,13 @@ export type Report = {
     passRateTarget: number;
     pointsPerMetric: number;
     redTriggers: number;
+    standardsCheckAt?: number;
     amberTriggers: number;
     thresholds: Metrics;
     metrics: { key: string; label: string; unit: string; threshold: number; rule: string }[];
   };
-  windowNote: string;
+  // Null when the period is exactly the standard window.
+  windowNote: string | null;
   tests: ReportTest[];
 };
 

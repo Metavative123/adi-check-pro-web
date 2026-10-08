@@ -9,6 +9,7 @@ import RecordVoiceOverOutlinedIcon from "@mui/icons-material/RecordVoiceOverOutl
 import type { Pagination, Test } from "@/lib/api";
 import { TestRowsSkeleton } from "@/components/Skeleton";
 import { useApp } from "@/lib/appContext";
+import { resultProblem } from "@/lib/testRules";
 
 // Paginated on the server - this renders the page it is given.
 export default function TestTable({
@@ -56,12 +57,22 @@ export default function TestTable({
                   <span className="truncate">{t.testCenter.name}</span>
                   <span>·</span>
                   <span>
-                    {t.faults.driving}D · {t.faults.serious}S · {t.faults.dangerous}X
+                    {t.faults.driving} driving · {t.faults.serious} serious ·{" "}
+                    {t.faults.dangerous} dangerous
                   </span>
                 </p>
               </div>
 
               <div className="flex shrink-0 items-center gap-2">
+                {/* A record saved before the result/fault check existed. */}
+                {resultProblem(t.result, t.faults) && (
+                  <span
+                    title={resultProblem(t.result, t.faults)}
+                    className="rounded-full bg-dial/15 px-2 py-0.5 text-[11px] font-semibold text-fg/80"
+                  >
+                    Check faults
+                  </span>
+                )}
                 {/* Icon plus a label for screen readers - never colour alone. */}
                 {t.physicalIntervention && (
                   <span title="Physical intervention" className="text-fg/40">
@@ -70,9 +81,9 @@ export default function TestTable({
                   </span>
                 )}
                 {t.verbalIntervention && (
-                  <span title="Verbal instruction" className="text-fg/40">
+                  <span title="Verbal intervention" className="text-fg/40">
                     <RecordVoiceOverOutlinedIcon sx={{ fontSize: 16 }} />
-                    <span className="sr-only">Verbal instruction</span>
+                    <span className="sr-only">Verbal intervention</span>
                   </span>
                 )}
                 <span

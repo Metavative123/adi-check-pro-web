@@ -60,11 +60,11 @@ export default function TestFilters({
         />
       </Field>
 
-      <Field label="Verbal instruction">
+      <Field label="Verbal intervention">
         <TriState
           value={value.verbalIntervention}
           onChange={(next) => set("verbalIntervention", next)}
-          label="Verbal instruction"
+          label="Verbal intervention"
         />
       </Field>
     </div>

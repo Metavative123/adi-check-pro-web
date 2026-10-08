@@ -64,7 +64,7 @@ const ROWS: Row[] = [
     better: "lower",
   },
   {
-    label: "Tests with verbal instruction",
+    label: "Tests with verbal intervention",
     value: (s) => s.totals.verbalInstructions,
     format: String,
     better: "lower",
