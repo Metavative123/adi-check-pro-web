@@ -1,5 +1,7 @@
 import Gauge from "@/components/Gauge";
 import SpeedIcon from "@mui/icons-material/Speed";
+import SiteLinks from "@/components/SiteLinks";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 // Shared shell for login / forgot-password / reset-password pages.
 export default function AuthLayout({
@@ -34,12 +36,14 @@ export default function AuthLayout({
       </section>
 
       {/* Right: the form */}
-      <section className="flex flex-1 items-center justify-center bg-canvas px-6 py-12">
+      <section className="relative flex flex-1 flex-col items-center justify-center bg-canvas px-6 py-12">
+        <ThemeSwitch className="absolute right-4 top-4 text-fg/60 hover:bg-raised hover:text-fg" />
         <div className="w-full max-w-md rounded-2xl border border-line bg-surface p-8 shadow-lg shadow-shade">
           <h1 className="text-2xl font-semibold text-fg">{title}</h1>
           <p className="mt-2 text-sm text-fg/60">{subtitle}</p>
           <div className="mt-8">{children}</div>
         </div>
+        <SiteLinks className="mt-6 justify-center text-fg/50" />
       </section>
     </main>
   );

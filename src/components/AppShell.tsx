@@ -13,6 +13,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import MenuIcon from "@mui/icons-material/Menu";
 import CloseIcon from "@mui/icons-material/Close";
 import Avatar from "@/components/Avatar";
+import SiteLinks from "@/components/SiteLinks";
+import ThemeSwitch from "@/components/ThemeSwitch";
 import { clearToken } from "@/lib/auth";
 import type { User } from "@/lib/api";
 
@@ -113,6 +115,7 @@ export default function AppShell({
         >
           <LogoutIcon fontSize="small" /> Sign out
         </button>
+        <SiteLinks className="mt-2 px-3 text-white/40 [&_a:hover]:text-white" />
       </div>
     </div>
   );
@@ -145,6 +148,7 @@ export default function AppShell({
           </button>
           <h1 className="flex-1 truncate font-semibold text-fg">{title}</h1>
           {action}
+          <ThemeSwitch className="text-fg/60 hover:bg-raised hover:text-fg" />
         </header>
 
         <div className="px-4 py-6 sm:px-6">{children}</div>

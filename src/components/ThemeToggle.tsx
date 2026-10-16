@@ -23,7 +23,7 @@ export default function ThemeToggle() {
             <p className="text-xs text-fg/50">
               {theme === "system"
                 ? `Following your device, currently ${resolvedTheme}.`
-                : `Always ${isDark ? "dark" : "day"}, on this browser.`}
+                : `${isDark ? "Dark" : "Light"} mode, saved on this browser.`}
             </p>
           </div>
         </div>

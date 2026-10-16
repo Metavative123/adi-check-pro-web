@@ -17,8 +17,11 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     // suppressHydrationWarning: the script below sets data-theme on <html>
     // before React hydrates, so the attribute differs from the server HTML.
+    // data-theme="dark" is the default for the first paint, and for anyone
+    // with scripts off; the script below swaps it for a saved choice.
     <html
       lang="en"
+      data-theme="dark"
       suppressHydrationWarning
       className={`${geistSans.variable} h-full antialiased`}
     >

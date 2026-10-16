@@ -13,6 +13,9 @@ export type ResolvedTheme = "light" | "dark";
 
 const STORAGE_KEY = "adi_theme";
 
+// What a visitor sees before they have chosen. Saved choices always win.
+export const DEFAULT_THEME: Theme = "dark";
+
 // The saved preference and the OS setting are both external stores, read with
 // useSyncExternalStore. That gives correct hydration without setting state in
 // an effect, which would cost an extra render on every page load.
@@ -26,9 +29,10 @@ function readStored(): Theme {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved === "light" || saved === "dark" || saved === "system") return saved;
   } catch {
-    // Private browsing or blocked storage - fall back to following the OS.
+    // Private browsing or blocked storage - fall back to the default.
   }
-  return "system";
+  // Dark is the default until the instructor chooses otherwise.
+  return DEFAULT_THEME;
 }
 
 function subscribePreference(onChange: () => void) {
@@ -46,7 +50,7 @@ function preferenceSnapshot(): Theme {
 // There is no preference on the server; the inline script has already applied
 // the real one to the document before React runs.
 function preferenceServerSnapshot(): Theme {
-  return "system";
+  return DEFAULT_THEME;
 }
 
 function writePreference(next: Theme) {
@@ -123,10 +127,12 @@ export const THEME_SCRIPT = `
   try {
     var stored = localStorage.getItem("${STORAGE_KEY}");
     var theme = stored === "light" || stored === "dark" ? stored
-      : (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      : stored === "system"
+        ? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+        : "${DEFAULT_THEME}";
     document.documentElement.setAttribute("data-theme", theme);
   } catch (e) {
-    document.documentElement.setAttribute("data-theme", "light");
+    document.documentElement.setAttribute("data-theme", "${DEFAULT_THEME}");
   }
 })();
 `;
