@@ -7,6 +7,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import { api } from "@/lib/api";
 import { getToken } from "@/lib/auth";
 import { Skeleton, SkeletonRegion } from "@/components/Skeleton";
+import ThemeSwitch from "@/components/ThemeSwitch";
 
 // Where Stripe sends the customer after paying.
 //
@@ -102,7 +103,8 @@ function Shell({ children }: { children: React.ReactNode }) {
     <main className="min-h-screen bg-canvas">
       <header className="flex items-center gap-2 bg-ink px-6 py-4 text-white">
         <SpeedIcon className="text-dial" />
-        <span className="font-semibold">ADI Check Pro</span>
+        <span className="flex-1 font-semibold">ADI Check Pro</span>
+        <ThemeSwitch className="text-white/70 hover:bg-white/10 hover:text-white" />
       </header>
       <div className="mx-auto max-w-md px-6 py-16">
         <div className="rounded-2xl border border-line bg-surface p-6 shadow-lg shadow-shade">

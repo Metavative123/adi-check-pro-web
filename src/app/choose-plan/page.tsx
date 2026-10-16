@@ -7,6 +7,7 @@ import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import PlanCards from "@/components/PlanCards";
 import { Skeleton, SkeletonRegion } from "@/components/Skeleton";
+import ThemeSwitch from "@/components/ThemeSwitch";
 import { api, type Billing, type Plan } from "@/lib/api";
 import { clearToken, getToken } from "@/lib/auth";
 
@@ -94,7 +95,8 @@ export default function ChoosePlanPage() {
     <main className="min-h-screen bg-canvas">
       <header className="flex items-center gap-2 bg-ink px-6 py-4 text-white">
         <SpeedIcon className="text-dial" />
-        <span className="font-semibold">ADI Check Pro</span>
+        <span className="flex-1 font-semibold">ADI Check Pro</span>
+        <ThemeSwitch className="text-white/70 hover:bg-white/10 hover:text-white" />
       </header>
 
       <div className="mx-auto max-w-4xl px-6 py-10">
