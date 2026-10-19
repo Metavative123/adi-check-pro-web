@@ -5,6 +5,7 @@ import Link from "next/link";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import Avatar from "@/components/Avatar";
+import FaultBreakdownCard from "@/components/FaultBreakdownCard";
 import LogTestModal from "@/components/LogTestModal";
 import PerformanceCard from "@/components/PerformanceCard";
 import { PerformanceSkeleton } from "@/components/Skeleton";
@@ -101,6 +102,14 @@ export default function DashboardPage() {
 
       {/* Standing right now */}
       {performance ? <PerformanceCard performance={performance} /> : <PerformanceSkeleton />}
+
+      {/* Where the faults are, to focus the teaching */}
+      {performance?.faultBreakdown && (
+        <FaultBreakdownCard
+          breakdown={performance.faultBreakdown}
+          windowMonths={performance.windowMonths}
+        />
+      )}
 
       {/* A short tail of history, with the way through to the rest */}
       <div>

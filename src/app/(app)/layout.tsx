@@ -80,6 +80,7 @@ function Shell({
           canWrite ? (
             <button
               onClick={() => setModalOpen(true)}
+              aria-label="Log a test"
               className="flex items-center gap-2 rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-white transition hover:bg-brand-dark"
             >
               <AddIcon fontSize="small" />

@@ -327,8 +327,11 @@ export async function downloadStandardsReport(report: Report) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   y = (doc as any).lastAutoTable.finalY + 8;
 
-  // ---------- Section 5: the tests themselves ----------
-  y = sectionHeading(doc, "5. Tests in the reporting period", y);
+  // ---------- Section 5: which DL25 items come up ----------
+  y = faultBreakdownSection(doc, autoTable, report, y, contentWidth);
+
+  // ---------- Section 6: the tests themselves ----------
+  y = sectionHeading(doc, "6. Tests in the reporting period", y);
 
   if (report.tests.length === 0) {
     paragraph(doc, "No tests were recorded in this period.", y, contentWidth);
@@ -338,6 +341,12 @@ export async function downloadStandardsReport(report: Report) {
     const needsCheck = (t: Report["tests"][number]) =>
       Boolean(resultProblem(t.result, { driving: t.driving, serious: t.serious, dangerous: t.dangerous }));
     const anyToCheck = report.tests.some(needsCheck);
+    // Where some tests were logged fault by fault and some as totals, mark the
+    // totals-only ones, which the breakdown above leaves out.
+    const mixed =
+      report.tests.some((t) => t.faultEntry === "detailed") &&
+      report.tests.some((t) => t.faultEntry !== "detailed");
+    const totalsOnly = (t: Report["tests"][number]) => mixed && t.faultEntry !== "detailed";
 
     autoTable(doc, {
       startY: y,
@@ -355,7 +364,7 @@ export async function downloadStandardsReport(report: Report) {
         ["Driving", "Serious", "Dangerous", "Physical", "Verbal"],
       ],
       body: report.tests.map((t) => [
-        t.reference,
+        t.reference + (totalsOnly(t) ? " †" : ""),
         t.date,
         t.pupilName ?? "Withheld",
         t.testCenter,
@@ -403,6 +412,9 @@ export async function downloadStandardsReport(report: Report) {
     doc.setTextColor(...MUTED);
     const notes = [
       "Intervention means the examiner took action during the test. Only physical intervention affects the score.",
+      ...(mixed
+        ? ["† Entered as totals only, so not included in the fault breakdown (section 5)."]
+        : []),
       ...(anyToCheck
         ? [
             "* The result does not match the faults recorded, for example a fail with no serious or dangerous fault. Please check and correct this test.",
@@ -440,6 +452,81 @@ export async function downloadStandardsReport(report: Report) {
 
   const names = report.namesHidden ? "anonymised" : "full";
   doc.save(`adi-check-pro-report-${report.period.from}-to-${report.period.to}-${names}.pdf`);
+}
+
+// Recurring driving faults and the headings with serious or dangerous faults,
+// from the tests logged fault by fault on the DL25. Returns the next y.
+function faultBreakdownSection(
+  doc: import("jspdf").jsPDF,
+  autoTable: typeof import("jspdf-autotable").default,
+  report: Report,
+  y: number,
+  width: number
+): number {
+  y = sectionHeading(doc, "5. Fault breakdown (detailed entries only)", y);
+
+  const breakdown = report.faultBreakdown;
+  const detailed = breakdown?.detailedTests ?? 0;
+  const left = breakdown?.totalsOnlyTests ?? report.tests.length;
+  const tests = (n: number) => `${n} test${n === 1 ? "" : "s"}`;
+
+  y = paragraph(
+    doc,
+    `This breakdown covers only the ${tests(detailed)} logged fault by fault against the DL25 categories. ` +
+      (left > 0
+        ? `${tests(left)} entered as totals only ${left === 1 ? "is" : "are"} not included, ` +
+          `although ${left === 1 ? "its" : "their"} totals count in every other figure in this report.`
+        : "Every test in the period was logged this way."),
+    y,
+    width
+  );
+
+  if (!breakdown || detailed === 0) return y + 2;
+
+  const name = (group: string, label: string) => (group === label ? label : `${group}: ${label}`);
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: MARGIN, right: MARGIN },
+    head: [["Recurring driving faults", "Driving faults", `Tests (of ${detailed})`]],
+    body: breakdown.drivingFaults.length
+      ? breakdown.drivingFaults.map((row) => [
+          name(row.groupLabel, row.label),
+          String(row.driving),
+          String(row.testsWithDriving),
+        ])
+      : [["No driving faults recorded", "-", "-"]],
+    rowPageBreak: "avoid",
+    styles: { fontSize: 8, cellPadding: 1.8, lineColor: LINE, lineWidth: 0.1 },
+    headStyles: { fillColor: INK, textColor: 255, fontStyle: "bold" },
+    columnStyles: { 1: { cellWidth: 28, halign: "right" }, 2: { cellWidth: 28, halign: "right" } },
+  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  y = (doc as any).lastAutoTable.finalY + 5;
+
+  autoTable(doc, {
+    startY: y,
+    margin: { left: MARGIN, right: MARGIN },
+    head: [["Categories with serious or dangerous faults", "Items", "Serious", "Dangerous"]],
+    body: breakdown.seriousDangerous.length
+      ? breakdown.seriousDangerous.map((group) => [
+          group.label,
+          group.items.map((item) => item.label).join(", "),
+          String(group.serious),
+          String(group.dangerous),
+        ])
+      : [["None recorded", "", "-", "-"]],
+    rowPageBreak: "avoid",
+    styles: { fontSize: 8, cellPadding: 1.8, lineColor: LINE, lineWidth: 0.1 },
+    headStyles: { fillColor: INK, textColor: 255, fontStyle: "bold" },
+    columnStyles: {
+      0: { cellWidth: 52, fontStyle: "bold" },
+      2: { cellWidth: 20, halign: "right" },
+      3: { cellWidth: 22, halign: "right" },
+    },
+  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return (doc as any).lastAutoTable.finalY + 8;
 }
 
 // "selected period" or, when it is exactly the standard window, says so.

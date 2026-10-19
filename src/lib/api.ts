@@ -1,6 +1,8 @@
 // One place that talks to the backend. Every page uses these functions.
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
 
+import type { FaultItems } from "@/lib/dl25";
+
 export type TestCenter = { _id: string; name: string; code?: string };
 
 export type User = {
@@ -25,6 +27,10 @@ export type Test = {
   testCenter: { centerId: string; name: string; code?: string };
   result: "pass" | "fail";
   faults: { driving: number; serious: number; dangerous: number };
+  // "detailed": logged item by item on the DL25, and the totals worked out
+  // from faultItems. "totals": only the three totals were entered.
+  faultEntry?: "detailed" | "totals";
+  faultItems?: FaultItems | null;
   totalFaults: number;
   physicalIntervention: boolean;
   verbalIntervention: boolean;
@@ -60,6 +66,31 @@ export type Performance = {
   triggers: (keyof Metrics)[];
   score: number;
   band: "green" | "amber" | "red";
+  faultBreakdown?: FaultBreakdown;
+};
+
+// Which DL25 items and headings come up, from detailed entries only.
+export type FaultBreakdown = {
+  detailedTests: number;
+  // Entered as totals only, so left out of the breakdown.
+  totalsOnlyTests: number;
+  // Most driving faults first.
+  drivingFaults: {
+    key: string;
+    label: string;
+    groupLabel: string;
+    driving: number;
+    // How many tests the item had a driving fault on.
+    testsWithDriving: number;
+  }[];
+  // Headings with a serious or dangerous fault, worst first.
+  seriousDangerous: {
+    key: string;
+    label: string;
+    serious: number;
+    dangerous: number;
+    items: { key: string; label: string; serious: number; dangerous: number }[];
+  }[];
 };
 
 // What the log-a-test wizard sends.
@@ -68,7 +99,11 @@ export type NewTest = {
   testDate: string;
   centerId: string;
   result: "pass" | "fail";
+  // Totals only. Ignored by the API when faultItems is sent, which it works
+  // the totals out from instead.
   faults: { driving: number; serious: number; dangerous: number };
+  // The DL25 items marked, or null for a totals-only entry.
+  faultItems: FaultItems | null;
   physicalIntervention: boolean;
   verbalIntervention: boolean;
 };
@@ -242,6 +277,7 @@ export type ReportTest = {
   dangerous: number;
   physicalIntervention: boolean;
   verbalIntervention: boolean;
+  faultEntry?: "detailed" | "totals";
 };
 
 export type Report = {
@@ -287,6 +323,7 @@ export type Report = {
   };
   // Null when the period is exactly the standard window.
   windowNote: string | null;
+  faultBreakdown?: FaultBreakdown;
   tests: ReportTest[];
 };
 

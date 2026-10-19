@@ -7,18 +7,33 @@ import EditIcon from "@mui/icons-material/Edit";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
+import Dl25FaultEntry from "@/components/Dl25FaultEntry";
 import { api, type Test, type User } from "@/lib/api";
 import { getToken } from "@/lib/auth";
+import {
+  DL25_GROUPS,
+  markedItems,
+  totalsFromItems,
+  type FaultItems,
+} from "@/lib/dl25";
 import { interventionWarning, resultProblem } from "@/lib/testRules";
 
 const STEPS = ["Pupil", "Result", "Faults", "Review"];
 
-// Everything the wizard collects, in one object.
+// Faults go in one of two ways, never both, so nothing is counted twice:
+//   detailed  item by item on the DL25; the totals are worked out from it
+//   totals    just the three totals, for a quick entry
+type FaultEntry = "detailed" | "totals";
+
+// Everything the wizard collects, in one object. Both ways of entering faults
+// are kept while the wizard is open, but only the chosen one is saved.
 type Form = {
   pupilName: string;
   testDate: string;
   centerId: string;
   result: "" | "pass" | "fail";
+  faultEntry: FaultEntry;
+  faultItems: FaultItems;
   driving: number;
   serious: number;
   dangerous: number;
@@ -31,6 +46,8 @@ const EMPTY: Form = {
   testDate: "",
   centerId: "",
   result: "",
+  faultEntry: "detailed",
+  faultItems: {},
   driving: 0,
   serious: 0,
   dangerous: 0,
@@ -66,6 +83,8 @@ export default function LogTestModal({
           testDate: test.testDate.slice(0, 10),
           centerId: test.testCenter.centerId,
           result: test.result,
+          faultEntry: test.faultItems ? "detailed" : "totals",
+          faultItems: test.faultItems ?? {},
           driving: test.faults.driving,
           serious: test.faults.serious,
           dangerous: test.faults.dangerous,
@@ -84,6 +103,17 @@ export default function LogTestModal({
   const set = <K extends keyof Form>(key: K, value: Form[K]) =>
     setForm((f) => ({ ...f, [key]: value }));
 
+  // The totals that will be saved, from whichever way is chosen.
+  const detailed = form.faultEntry === "detailed";
+  const faults = detailed
+    ? totalsFromItems(form.faultItems)
+    : { driving: form.driving, serious: form.serious, dangerous: form.dangerous };
+  const marked = markedItems(form.faultItems);
+  // Something entered the other way, which saving will drop.
+  const otherWayEntered = detailed
+    ? form.driving + form.serious + form.dangerous > 0
+    : Object.keys(marked).length > 0;
+
   // Each step says what must be filled in before moving on.
   function validate(current: number) {
     if (current === 1) {
@@ -93,7 +123,7 @@ export default function LogTestModal({
     }
     if (current === 2 && !form.result) return "Choose pass or fail";
     if (current >= 3) {
-      const problem = resultProblem(form.result, form);
+      const problem = resultProblem(form.result, faults);
       if (problem) return problem;
     }
     return "";
@@ -132,11 +162,9 @@ export default function LogTestModal({
       testDate: form.testDate,
       centerId: form.centerId,
       result: form.result as "pass" | "fail",
-      faults: {
-        driving: form.driving,
-        serious: form.serious,
-        dangerous: form.dangerous,
-      },
+      faults,
+      // Sent only for a detailed entry; the API works the totals out from it.
+      faultItems: detailed ? marked : null,
       physicalIntervention: form.physicalIntervention,
       verbalIntervention: form.verbalIntervention,
     };
@@ -222,22 +250,52 @@ export default function LogTestModal({
 
       {step === 3 && (
         <div className="space-y-5">
-          <Counter
-            label="Driving faults"
-            hint="Minor faults"
-            value={form.driving}
-            onChange={(v) => set("driving", v)}
-          />
-          <Counter
-            label="Serious faults"
-            value={form.serious}
-            onChange={(v) => set("serious", v)}
-          />
-          <Counter
-            label="Dangerous faults"
-            value={form.dangerous}
-            onChange={(v) => set("dangerous", v)}
-          />
+          <EntryChoice value={form.faultEntry} onChange={(v) => set("faultEntry", v)} />
+
+          {detailed ? (
+            <>
+              <p className="text-xs text-fg/60">
+                Mark each fault as it appears on the DL25. Tap + for every driving fault on an
+                item, and S or D for a serious or dangerous fault.
+              </p>
+              <TotalsBar faults={faults} />
+              <Dl25FaultEntry
+                items={form.faultItems}
+                onChange={(items) => set("faultItems", items)}
+              />
+            </>
+          ) : (
+            <>
+              <p className="text-xs text-fg/60">
+                Totals only is quicker, but the test is left out of the fault category breakdown
+                on your dashboard and report.
+              </p>
+              <Counter
+                label="Driving faults"
+                hint="Minor faults"
+                value={form.driving}
+                onChange={(v) => set("driving", v)}
+              />
+              <Counter
+                label="Serious faults"
+                value={form.serious}
+                onChange={(v) => set("serious", v)}
+              />
+              <Counter
+                label="Dangerous faults"
+                value={form.dangerous}
+                onChange={(v) => set("dangerous", v)}
+              />
+            </>
+          )}
+
+          {otherWayEntered && (
+            <p className="rounded-lg bg-dial/10 px-3 py-2 text-xs text-fg/80">
+              {detailed
+                ? "The totals you typed will not be saved. The totals are worked out from the items you mark here."
+                : "The faults you marked item by item will not be saved, only these totals."}
+            </p>
+          )}
 
           <div className="space-y-4 border-t border-line pt-5">
             <YesNo
@@ -254,9 +312,9 @@ export default function LogTestModal({
               Physical intervention counts towards your rating. Verbal intervention is recorded
               for your records only.
             </p>
-            {interventionWarning(form.physicalIntervention, form.verbalIntervention, form) && (
+            {interventionWarning(form.physicalIntervention, form.verbalIntervention, faults) && (
               <p className="rounded-lg bg-dial/10 px-3 py-2 text-xs text-fg/80">
-                {interventionWarning(form.physicalIntervention, form.verbalIntervention, form)}
+                {interventionWarning(form.physicalIntervention, form.verbalIntervention, faults)}
               </p>
             )}
           </div>
@@ -280,9 +338,14 @@ export default function LogTestModal({
           </ReviewGroup>
 
           <ReviewGroup title="Faults" onEdit={() => setStep(3)}>
-            <Row label="Driving" value={String(form.driving)} />
-            <Row label="Serious" value={String(form.serious)} />
-            <Row label="Dangerous" value={String(form.dangerous)} />
+            <Row
+              label="Entered"
+              value={detailed ? "Fault by fault (DL25)" : "Totals only"}
+            />
+            <Row label="Driving" value={String(faults.driving)} />
+            <Row label="Serious" value={String(faults.serious)} />
+            <Row label="Dangerous" value={String(faults.dangerous)} />
+            {detailed && <MarkedList items={marked} />}
             <Row
               label="Physical intervention"
               value={form.physicalIntervention ? "Yes" : "No"}
@@ -526,5 +589,90 @@ function Row({
         {value || "-"}
       </dd>
     </div>
+  );
+}
+
+// Fault by fault, or the three totals: one or the other is saved.
+function EntryChoice({
+  value,
+  onChange,
+}: {
+  value: FaultEntry;
+  onChange: (v: FaultEntry) => void;
+}) {
+  const options: { value: FaultEntry; label: string }[] = [
+    { value: "detailed", label: "Fault by fault (DL25)" },
+    { value: "totals", label: "Totals only" },
+  ];
+  return (
+    <div role="radiogroup" aria-label="How to enter faults" className="grid grid-cols-2 gap-1 rounded-lg bg-raised p-1">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          role="radio"
+          aria-checked={value === option.value}
+          onClick={() => onChange(option.value)}
+          className={
+            "rounded-md px-3 py-2 text-sm font-medium transition " +
+            (value === option.value ? "bg-surface text-fg shadow-sm" : "text-fg/60 hover:text-fg")
+          }
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// The totals worked out from the items, kept in view while marking.
+function TotalsBar({ faults }: { faults: { driving: number; serious: number; dangerous: number } }) {
+  return (
+    <div className="grid grid-cols-3 gap-2 text-center">
+      {(
+        [
+          ["Driving", faults.driving],
+          ["Serious", faults.serious],
+          ["Dangerous", faults.dangerous],
+        ] as const
+      ).map(([label, value]) => (
+        <div key={label} className="rounded-lg border border-line px-2 py-1.5">
+          <p className="text-lg font-semibold tabular-nums text-fg">{value}</p>
+          <p className="text-[11px] text-fg/50">{label}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// "Junctions: Observation - 2 driving, S" for each item marked.
+function MarkedList({ items }: { items: FaultItems }) {
+  const rows = DL25_GROUPS.flatMap((group) =>
+    group.items
+      .filter((item) => items[item.key])
+      .map((item) => {
+        const m = items[item.key];
+        const name = group.items.length === 1 ? group.label : `${group.label}: ${item.label}`;
+        const marks = [
+          m.driving ? `${m.driving} driving` : "",
+          m.serious ? "S" : "",
+          m.dangerous ? "D" : "",
+        ].filter(Boolean);
+        return { key: item.key, name, marks: marks.join(", ") };
+      })
+  );
+
+  if (rows.length === 0) {
+    return <p className="pt-1 text-xs text-fg/50">No faults marked.</p>;
+  }
+  return (
+    <ul className="mt-2 space-y-0.5 border-t border-line pt-2 text-xs">
+      {rows.map((row) => (
+        <li key={row.key} className="flex justify-between gap-3">
+          <span className="text-fg/70">{row.name}</span>
+          <span className="shrink-0 font-medium text-fg">{row.marks}</span>
+        </li>
+      ))}
+    </ul>
   );
 }
