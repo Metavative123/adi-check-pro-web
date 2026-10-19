@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export const CONTACT_EMAIL = "info@adicheckpro.com";
+export const CONTACT_EMAIL = "info@adicheckpro.co.uk";
 
 // Contact, terms and privacy, shown in the footer of every kind of page.
 export default function SiteLinks({ className = "" }: { className?: string }) {
