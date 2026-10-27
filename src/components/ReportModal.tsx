@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
+import TableChartOutlinedIcon from "@mui/icons-material/TableChartOutlined";
 import VisibilityOffOutlinedIcon from "@mui/icons-material/VisibilityOffOutlined";
 import Modal from "@/components/Modal";
 import Button from "@/components/Button";
@@ -46,6 +47,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
   const [to, setTo] = useState(today);
   // Deliberately a required decision rather than a buried default.
   const [hideNames, setHideNames] = useState(false);
+  const [format, setFormat] = useState<"pdf" | "csv">("pdf");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
 
@@ -67,9 +69,14 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
 
     try {
       const { report } = await api.getReport(token, from, to, hideNames);
-      // jsPDF is browser-only, so it is pulled in here rather than at the top.
-      const { downloadStandardsReport } = await import("@/lib/standardsReportPdf");
-      await downloadStandardsReport(report);
+      if (format === "csv") {
+        const { downloadTestsCsv } = await import("@/lib/testsCsv");
+        downloadTestsCsv(report, from, to);
+      } else {
+        // jsPDF is browser-only, so it is pulled in here rather than at the top.
+        const { downloadStandardsReport } = await import("@/lib/standardsReportPdf");
+        await downloadStandardsReport(report);
+      }
       onClose();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not build the report");
@@ -78,11 +85,17 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
   }
 
   return (
-    <Modal open onClose={onClose} title="Export performance report">
+    <Modal open onClose={onClose} title="Export">
       <div className="space-y-5">
+        <div className="flex gap-2">
+          <ChoiceButton selected={format === "pdf"} onClick={() => setFormat("pdf")} label="PDF report" />
+          <ChoiceButton selected={format === "csv"} onClick={() => setFormat("csv")} label="CSV (spreadsheet)" />
+        </div>
+
         <p className="text-sm text-fg/60">
-          A PDF of every test in the period, with the calculation behind each figure
-          and the rules used to work out the overall score.
+          {format === "pdf"
+            ? "A PDF of every test in the period, with the calculation behind each figure and the rules used to work out the overall score."
+            : "Your test history as a spreadsheet: one row per test, with its faults, result and the DL25 items marked. Opens in Excel, Numbers or Google Sheets."}
         </p>
 
         <div className="flex flex-wrap gap-2">
@@ -133,7 +146,7 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
             <div className="min-w-0 flex-1">
               <p className="text-sm font-medium text-fg">Pupil names</p>
               <p className="mt-0.5 text-xs text-fg/50">
-                Choose whether names appear in the PDF. Every test still shows its
+                Choose whether names appear in the {format === "pdf" ? "PDF" : "file"}. Every test still shows its
                 test ID, faults and result either way.
               </p>
 
@@ -152,13 +165,14 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
 
               {hideNames && (
                 <p className="mt-2 text-xs text-brand">
-                  Names are removed on the server, so the PDF will not contain them.
+                  Names are removed on the server, so the {format === "pdf" ? "PDF" : "file"} will not contain them.
                 </p>
               )}
             </div>
           </div>
         </div>
 
+        {format === "pdf" && (
         <p className="text-xs text-fg/50">
           {from === periodStart(today, 12) && to === today
             ? "This is the same 12 months as your dashboard, so the figures will match."
@@ -166,13 +180,18 @@ export default function ReportModal({ onClose }: { onClose: () => void }) {
               ? "Exactly 12 months. Figures will match the dashboard only if it ends today."
               : "Every figure in the PDF is for this period, so it can differ from the dashboard's rolling 12 months."}
         </p>
+        )}
 
         {error && <p className="text-sm text-danger">{error}</p>}
 
         <Button onClick={download} loading={busy}>
           <span className="flex items-center justify-center gap-2">
-            <PictureAsPdfOutlinedIcon fontSize="small" />
-            Download PDF
+            {format === "pdf" ? (
+              <PictureAsPdfOutlinedIcon fontSize="small" />
+            ) : (
+              <TableChartOutlinedIcon fontSize="small" />
+            )}
+            {format === "pdf" ? "Download PDF" : "Download CSV"}
           </span>
         </Button>
       </div>

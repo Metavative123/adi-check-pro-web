@@ -6,6 +6,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import Avatar from "@/components/Avatar";
 import FaultBreakdownCard from "@/components/FaultBreakdownCard";
+import RecurringFaultAlerts from "@/components/RecurringFaultAlerts";
 import LogTestModal from "@/components/LogTestModal";
 import PerformanceCard from "@/components/PerformanceCard";
 import { PerformanceSkeleton } from "@/components/Skeleton";
@@ -96,12 +97,17 @@ export default function DashboardPage() {
           className="flex items-center justify-center gap-2 rounded-lg border border-line bg-surface px-4 py-2.5 text-sm font-medium text-fg transition hover:bg-raised"
         >
           <PictureAsPdfOutlinedIcon fontSize="small" />
-          Export PDF report
+          Export PDF / CSV
         </button>
       </div>
 
       {/* Standing right now */}
       {performance ? <PerformanceCard performance={performance} /> : <PerformanceSkeleton />}
+
+      {/* Faults that keep coming up on the latest tests */}
+      {performance?.recurringFaults && (
+        <RecurringFaultAlerts recurring={performance.recurringFaults} />
+      )}
 
       {/* Where the faults are, to focus the teaching */}
       {performance?.faultBreakdown && (

@@ -17,7 +17,6 @@ export default function ChoosePlanPage() {
   const router = useRouter();
   const [billing, setBilling] = useState<Billing | null>(null);
   const [busyPlanId, setBusyPlanId] = useState<string | null>(null);
-  const [startingTrial, setStartingTrial] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
@@ -54,21 +53,6 @@ export default function ChoosePlanPage() {
       cancelled = true;
     };
   }, [router]);
-
-  async function takeTrial() {
-    const token = getToken();
-    if (!token) return;
-
-    setStartingTrial(true);
-    setError("");
-    try {
-      await api.chooseTrial(token);
-      router.replace("/dashboard");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not start the trial");
-      setStartingTrial(false);
-    }
-  }
 
   async function pay(planId: Plan["id"]) {
     const token = getToken();
@@ -113,10 +97,13 @@ export default function ChoosePlanPage() {
           </SkeletonRegion>
         ) : (
           <>
-            <h1 className="text-2xl font-semibold">Choose how to start</h1>
+            <h1 className="text-2xl font-semibold">
+              {billing.trialOffer > 0
+                ? `Start your ${billing.trialOffer}-day free trial`
+                : "Choose a plan"}
+            </h1>
             <p className="mt-2 text-sm text-fg/60">
-              Try it free first, or go straight to a plan. You can change this later
-              from Billing.
+              Pick the plan you want to keep. You can change it later from Billing.
             </p>
 
             {billing.testMode && (
@@ -128,42 +115,31 @@ export default function ChoosePlanPage() {
               </p>
             )}
 
-            {/* The free trial, given its own row so it is not read as a
-                fourth price. No card is taken. */}
-            <section className="mt-6 flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-line bg-surface p-5 shadow-lg shadow-shade">
-              <div className="flex items-start gap-3">
+            {/* The card is taken now; the plan's price is first charged when
+                the trial ends, unless it is cancelled before then. */}
+            {billing.trialOffer > 0 && (
+              <section className="mb-6 mt-6 flex items-start gap-3 rounded-2xl border border-line bg-surface p-5 shadow-lg shadow-shade">
                 <TimerOutlinedIcon className="mt-0.5 text-brand" />
                 <div>
                   <h2 className="font-semibold">
-                    Free trial · {billing.trialDays} days
+                    {billing.trialOffer} days free, everything included
                   </h2>
                   <p className="mt-0.5 text-sm text-fg/60">
-                    Everything included. <strong>No card required</strong> - pick a
-                    plan whenever you are ready.
+                    Add your card now. <strong>Nothing is charged until{" "}
+                    {trialEndDate(billing.trialOffer)}</strong>, then your plan
+                    starts. Cancel before then and you pay nothing.
                   </p>
                 </div>
-              </div>
-
-              <button
-                onClick={takeTrial}
-                disabled={startingTrial || Boolean(busyPlanId)}
-                className="rounded-lg bg-brand px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-brand-dark disabled:opacity-60"
-              >
-                {startingTrial ? "Starting..." : "Start free trial"}
-              </button>
-            </section>
-
-            <h2 className="mt-8 font-semibold">Or subscribe now</h2>
-            <p className="mb-4 mt-1 text-sm text-fg/60">
-              Longer plans cost less per month.
-            </p>
+              </section>
+            )}
+            {billing.trialOffer === 0 && <div className="mt-6" />}
 
             <PlanCards
               plans={billing.plans}
               founding={billing.founding}
               busyPlanId={busyPlanId}
               onChoose={pay}
-              ctaLabel="Pay"
+              ctaLabel={billing.trialOffer > 0 ? "Start trial with" : "Pay"}
             />
 
             {error && <p className="mt-4 text-sm text-danger">{error}</p>}
@@ -172,4 +148,11 @@ export default function ChoosePlanPage() {
       </div>
     </main>
   );
+}
+
+// The day the first charge is taken, e.g. "26 November 2026".
+function trialEndDate(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
 }

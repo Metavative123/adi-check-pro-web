@@ -143,13 +143,16 @@ function BillingContent() {
   }
 
   const onTrial = billing.status === "trialing";
-  const subscribed = billing.status === "active";
+  // A card trial already has its Stripe subscription, so it is managed like one.
+  const subscribed = billing.status === "active" || billing.trialConverts;
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       {returningFromCheckout && subscribed && (
         <p className="rounded-xl bg-brand-light px-4 py-3 text-sm text-brand-fg">
-          Payment received. Your subscription is active.
+          {billing.trialConverts
+            ? "Card saved. Your free trial has started."
+            : "Payment received. Your subscription is active."}
         </p>
       )}
 
@@ -184,13 +187,18 @@ function BillingContent() {
           {onTrial && billing.hasAccess && (
             <>
               {billing.trialDaysLeft} day{billing.trialDaysLeft === 1 ? "" : "s"} left in
-              your free trial. No card needed until it ends.
+              your free trial.{" "}
+              {billing.trialConverts && billing.trialEndsAt
+                ? `Your plan starts and your card is first charged on ${new Date(billing.trialEndsAt).toLocaleDateString("en-GB")}.`
+                : billing.hasBillingAccount && billing.cancelAtPeriodEnd
+                  ? "Cancelled: it ends without charging your card."
+                  : "Choose a plan below to keep going after it ends."}
             </>
           )}
           {onTrial && !billing.hasAccess && (
             <>Your free trial has ended. Subscribe to keep logging tests.</>
           )}
-          {subscribed && (billing.accessEndsAt || billing.currentPeriodEnd) && (
+          {billing.status === "active" && (billing.accessEndsAt || billing.currentPeriodEnd) && (
             <>
               {billing.cancelAtPeriodEnd ? "Access ends " : "Renews "}
               {new Date(

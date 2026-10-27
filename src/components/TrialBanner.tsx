@@ -32,13 +32,14 @@ export default function TrialBanner() {
       <span>
         {expired
           ? "Your access has ended. Subscribe to keep logging tests."
-          : `${billing.trialDaysLeft} day${billing.trialDaysLeft === 1 ? "" : "s"} left in your free trial.`}
+          : `${billing.trialDaysLeft} day${billing.trialDaysLeft === 1 ? "" : "s"} left in your free trial.` +
+            (billing.trialConverts ? " Your plan starts when it ends." : "")}
       </span>
       <Link
         href="/billing"
         className="rounded-lg bg-brand px-3 py-1.5 text-xs font-semibold text-white hover:bg-brand-dark"
       >
-        {expired ? "Subscribe" : "See plans"}
+        {expired ? "Subscribe" : billing.trialConverts ? "Billing" : "See plans"}
       </Link>
     </div>
   );

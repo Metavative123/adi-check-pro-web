@@ -78,7 +78,8 @@ function CheckoutComplete() {
       <div className="flex items-center gap-3">
         <CheckCircleIcon className="text-brand" />
         <div>
-          <h1 className="font-semibold">Payment received</h1>
+          {/* A trial takes the card but charges nothing yet. */}
+          <h1 className="font-semibold">All set</h1>
           <p className="text-sm text-fg/60">Setting up your account...</p>
         </div>
       </div>

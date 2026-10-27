@@ -67,6 +67,24 @@ export type Performance = {
   score: number;
   band: "green" | "amber" | "red";
   faultBreakdown?: FaultBreakdown;
+  recurringFaults?: RecurringFaults;
+};
+
+// DL25 items that came up on at least minAppearances of the last
+// lookbackTests detailed tests, most often first.
+export type RecurringFaults = {
+  lookbackTests: number;
+  minAppearances: number;
+  testsChecked: number;
+  alerts: {
+    key: string;
+    label: string;
+    groupLabel: string;
+    tests: number;
+    driving: number;
+    serious: number;
+    dangerous: number;
+  }[];
 };
 
 // Which DL25 items and headings come up, from detailed entries only.
@@ -216,7 +234,7 @@ export type Billing = {
   plans: Plan[];
   founding?: FoundingCount;
   trialDays: number;
-  // False until the instructor has picked a trial or a paid plan.
+  // False until the instructor has picked a plan.
   planSelected: boolean;
   planId: string | null;
   needsPlanChoice: boolean;
@@ -226,6 +244,10 @@ export type Billing = {
   plan: string;
   trialEndsAt?: string;
   trialDaysLeft: number;
+  // Free days the next Checkout gives; 0 once the trial has been used.
+  trialOffer: number;
+  // On a Stripe trial with a card on file: the plan charges when it ends.
+  trialConverts: boolean;
   currentPeriodEnd?: string;
   cancelAtPeriodEnd: boolean;
   // The day access actually ends when a cancellation is pending. Use this
@@ -278,6 +300,8 @@ export type ReportTest = {
   physicalIntervention: boolean;
   verbalIntervention: boolean;
   faultEntry?: "detailed" | "totals";
+  isoDate?: string;
+  faultItems?: FaultItems | null;
 };
 
 export type Report = {
@@ -438,10 +462,6 @@ export const api = {
 
   // Public: how many founding places are left, for the sign-up page.
   getFoundingCount: () => request<{ founding: FoundingCount }>("/billing/founding"),
-
-  // Taking the trial needs no card and never touches Stripe.
-  chooseTrial: (token: string) =>
-    request<{ user: User }>("/billing/trial", { method: "POST", token }),
 
   startCheckout: (
     token: string,

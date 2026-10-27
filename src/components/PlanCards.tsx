@@ -11,7 +11,7 @@ const FEATURES = [
   "Unlimited test logging",
   "12-month performance rating",
   "Pass-rate and fault trends",
-  "PDF performance reports",
+  "PDF reports and CSV export",
 ];
 
 // The paid plans, side by side. The saving on each is worked out by the server
