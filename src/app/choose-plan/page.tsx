@@ -6,6 +6,7 @@ import SpeedIcon from "@mui/icons-material/Speed";
 import ScienceOutlinedIcon from "@mui/icons-material/ScienceOutlined";
 import TimerOutlinedIcon from "@mui/icons-material/TimerOutlined";
 import PlanCards from "@/components/PlanCards";
+import SiteLinks from "@/components/SiteLinks";
 import { Skeleton, SkeletonRegion } from "@/components/Skeleton";
 import ThemeSwitch from "@/components/ThemeSwitch";
 import { api, type Billing, type Plan } from "@/lib/api";
@@ -145,6 +146,8 @@ export default function ChoosePlanPage() {
             {error && <p className="mt-4 text-sm text-danger">{error}</p>}
           </>
         )}
+
+        <SiteLinks className="mt-10 justify-center text-fg/50" />
       </div>
     </main>
   );

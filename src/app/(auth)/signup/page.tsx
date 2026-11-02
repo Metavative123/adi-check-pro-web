@@ -22,6 +22,7 @@ export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
+  const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,11 +42,15 @@ export default function SignUpPage() {
       setError("Passwords do not match.");
       return;
     }
+    if (!acceptTerms) {
+      setError("Please accept the Terms & Conditions to create an account.");
+      return;
+    }
     setError("");
     setLoading(true);
 
     try {
-      const { token } = await api.register(name, email, password);
+      const { token } = await api.register(name, email, password, acceptTerms);
       saveToken(token);
       // A new account never has a badge number or centres yet.
       router.push("/onboarding");
@@ -129,16 +134,31 @@ export default function SignUpPage() {
           icon={<LockOutlinedIcon fontSize="small" />}
         />
 
+        {/* The links open in a new tab, so reading them does not lose the form. */}
         <label className="flex items-start gap-2 text-sm text-fg/70">
-          <input type="checkbox" required className="mt-1 accent-brand" />
+          <input
+            type="checkbox"
+            required
+            checked={acceptTerms}
+            onChange={(e) => setAcceptTerms(e.target.checked)}
+            className="mt-1 accent-brand"
+          />
           <span>
-            I agree to the{" "}
-            <Link href="/terms" className="font-medium text-brand hover:underline">
-              terms of service
+            I accept the{" "}
+            <Link
+              href="/terms"
+              target="_blank"
+              className="font-medium text-brand hover:underline"
+            >
+              Terms &amp; Conditions
             </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="font-medium text-brand hover:underline">
-              privacy policy
+            and have read the{" "}
+            <Link
+              href="/privacy"
+              target="_blank"
+              className="font-medium text-brand hover:underline"
+            >
+              Privacy Policy
             </Link>
             .
           </span>

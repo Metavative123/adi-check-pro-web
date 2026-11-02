@@ -409,8 +409,11 @@ async function request<T>(path: string, options: Options = {}): Promise<T> {
 }
 
 export const api = {
-  register: (name: string, email: string, password: string) =>
-    request<AuthResult>("/auth/register", { method: "POST", body: { name, email, password } }),
+  register: (name: string, email: string, password: string, acceptTerms: boolean) =>
+    request<AuthResult>("/auth/register", {
+      method: "POST",
+      body: { name, email, password, acceptTerms },
+    }),
 
   login: (email: string, password: string) =>
     request<AuthResult>("/auth/login", { method: "POST", body: { email, password } }),
