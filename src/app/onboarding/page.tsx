@@ -88,6 +88,39 @@ export default function OnboardingPage() {
     setSaving(false);
   }
 
+  // The main button. On a phone it is easy to type a centre and never press
+  // "+", so anything still typed in the boxes is saved here before moving on.
+  async function finish() {
+    const token = getToken();
+    if (!token || !user) return;
+
+    setSaving(true);
+    setError("");
+    try {
+      let latest = user;
+      if (badge.trim() && badge.trim() !== (latest.adiBadgeNumber || "")) {
+        latest = (await api.updateProfile(token, { adiBadgeNumber: badge })).user;
+      }
+      if (centerName.trim()) {
+        latest = (
+          await api.addTestCenter(token, { name: centerName, code: centerCode || undefined })
+        ).user;
+        setCenterName("");
+        setCenterCode("");
+      }
+      setUser(latest);
+
+      if (latest.adiBadgeNumber && latest.testCenters.length > 0) {
+        router.push("/choose-plan");
+        return;
+      }
+      setError(latest.adiBadgeNumber ? "Add at least one test centre" : "Enter your ADI badge number");
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save your details");
+    }
+    setSaving(false);
+  }
+
   async function removeCenter(centerId: string) {
     const token = getToken();
     if (!token) return;
@@ -121,7 +154,9 @@ export default function OnboardingPage() {
   }
 
   const badgeSaved = Boolean(user.adiBadgeNumber);
-  const ready = badgeSaved && user.testCenters.length > 0;
+  // Typed but not yet saved counts: finish() saves it.
+  const ready =
+    Boolean(badge.trim()) && (user.testCenters.length > 0 || Boolean(centerName.trim()));
 
   return (
     <main className="min-h-screen bg-canvas">
@@ -222,8 +257,8 @@ export default function OnboardingPage() {
         {error && <p className="mt-4 text-sm text-danger">{error}</p>}
 
         <div className="mt-8">
-          <Button onClick={() => router.push("/choose-plan")} disabled={!ready}>
-            {ready ? "Go to dashboard" : "Add a badge number and one centre"}
+          <Button onClick={finish} disabled={!ready} loading={saving}>
+            {ready ? "Continue" : "Add a badge number and one centre"}
           </Button>
         </div>
       </div>
