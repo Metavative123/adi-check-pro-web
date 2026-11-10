@@ -7,6 +7,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import AuthLayout from "@/components/AuthLayout";
 import Field from "@/components/Field";
 import Button from "@/components/Button";
+import { api } from "@/lib/api";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
@@ -21,16 +22,22 @@ export default function ResetPasswordPage() {
       setError("Passwords do not match.");
       return;
     }
+    // The token comes from the emailed link: /reset-password?token=...
+    const token = new URLSearchParams(window.location.search).get("token");
+    if (!token) {
+      setError("This page needs the link from the reset email. Ask for a new one.");
+      return;
+    }
+
     setError("");
     setLoading(true);
-
-    // TODO: connect to backend — POST { token, password } to the reset API.
-    // The token comes from the email link, e.g. /reset-password?token=abc
-    console.log("reset password", { password });
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await api.resetPassword(token, password);
       setDone(true);
-    }, 600);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not change the password");
+    }
+    setLoading(false);
   }
 
   if (done) {

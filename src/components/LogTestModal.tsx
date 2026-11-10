@@ -20,6 +20,32 @@ import { interventionWarning, resultProblem } from "@/lib/testRules";
 
 const STEPS = ["Pupil", "Result", "Faults", "Review"];
 
+// Which car the test was in, and so which pass rates it counts towards.
+type Car = "instructor" | "own_supplied" | "own_not_supplied";
+
+const CAR_OPTIONS: { value: Car; label: string; countsTowards: string }[] = [
+  {
+    value: "instructor",
+    label: "My car (ADI number supplied)",
+    countsTowards: "Counts towards both pass rates",
+  },
+  {
+    value: "own_supplied",
+    label: "Pupil's own car - ADI number supplied",
+    countsTowards: "Counts towards both pass rates",
+  },
+  {
+    value: "own_not_supplied",
+    label: "Pupil's own car - ADI number not supplied",
+    countsTowards: "Counts towards the overall recorded pass rate only",
+  },
+];
+
+function carOf(test: Test): Car {
+  if (!test.pupilOwnCar) return "instructor";
+  return test.adiNumberSupplied === false ? "own_not_supplied" : "own_supplied";
+}
+
 // Faults go in one of two ways, never both, so nothing is counted twice:
 //   detailed  item by item on the DL25; the totals are worked out from it
 //   totals    just the three totals, for a quick entry
@@ -31,6 +57,7 @@ type Form = {
   pupilName: string;
   testDate: string;
   centerId: string;
+  car: Car;
   result: "" | "pass" | "fail";
   faultEntry: FaultEntry;
   faultItems: FaultItems;
@@ -45,6 +72,7 @@ const EMPTY: Form = {
   pupilName: "",
   testDate: "",
   centerId: "",
+  car: "instructor",
   result: "",
   faultEntry: "detailed",
   faultItems: {},
@@ -82,6 +110,7 @@ export default function LogTestModal({
           pupilName: test.pupilName,
           testDate: test.testDate.slice(0, 10),
           centerId: test.testCenter.centerId,
+          car: carOf(test),
           result: test.result,
           faultEntry: test.faultItems ? "detailed" : "totals",
           faultItems: test.faultItems ?? {},
@@ -167,6 +196,8 @@ export default function LogTestModal({
       faultItems: detailed ? marked : null,
       physicalIntervention: form.physicalIntervention,
       verbalIntervention: form.verbalIntervention,
+      pupilOwnCar: form.car !== "instructor",
+      adiNumberSupplied: form.car !== "own_not_supplied",
     };
 
     try {
@@ -186,6 +217,7 @@ export default function LogTestModal({
   }
 
   const center = user.testCenters.find((c) => c._id === form.centerId);
+  const car = CAR_OPTIONS.find((o) => o.value === form.car)!;
 
   return (
     <Modal open onClose={onClose} title={editing ? `Edit test ${test?.reference}` : "Log a test"}>
@@ -226,6 +258,8 @@ export default function LogTestModal({
               ))}
             </select>
           </Labelled>
+
+          <CarChoice value={form.car} onChange={(v) => set("car", v)} />
         </div>
       )}
 
@@ -327,6 +361,8 @@ export default function LogTestModal({
             <Row label="Name" value={form.pupilName} />
             <Row label="Date" value={form.testDate} />
             <Row label="Centre" value={center ? center.name : "-"} />
+            <Row label="Car" value={car.label} />
+            <Row label="Pass rates" value={car.countsTowards} />
           </ReviewGroup>
 
           <ReviewGroup title="Result" onEdit={() => setStep(2)}>
@@ -578,17 +614,59 @@ function Row({
   tone?: "pass" | "fail";
 }) {
   return (
-    <div className="flex justify-between text-sm">
-      <dt className="text-fg/60">{label}</dt>
+    <div className="flex justify-between gap-4 text-sm">
+      <dt className="shrink-0 text-fg/60">{label}</dt>
       <dd
         className={
-          "font-medium " +
+          "text-right font-medium " +
           (tone === "pass" ? "text-brand" : tone === "fail" ? "text-danger" : "text-fg")
         }
       >
         {value || "-"}
       </dd>
     </div>
+  );
+}
+
+// The car, as three plain choices, each saying which pass rates it counts
+// towards so the instructor knows before saving.
+function CarChoice({ value, onChange }: { value: Car; onChange: (v: Car) => void }) {
+  return (
+    <fieldset>
+      <legend className="mb-1.5 block text-sm font-medium text-fg">Car used for the test</legend>
+      <div role="radiogroup" aria-label="Car used for the test" className="space-y-2">
+        {CAR_OPTIONS.map((option) => {
+          const selected = value === option.value;
+          const bothRates = option.value !== "own_not_supplied";
+          return (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={selected}
+              onClick={() => onChange(option.value)}
+              className={
+                "flex w-full items-start gap-3 rounded-lg border px-3 py-2.5 text-left transition " +
+                (selected ? "border-brand bg-brand-light" : "border-line hover:bg-raised")
+              }
+            >
+              <span
+                className={
+                  "mt-0.5 h-4 w-4 shrink-0 rounded-full border-2 " +
+                  (selected ? "border-brand bg-brand" : "border-fg/30")
+                }
+              />
+              <span>
+                <span className="block text-sm font-medium text-fg">{option.label}</span>
+                <span className={"block text-xs " + (bothRates ? "text-brand" : "text-dial")}>
+                  {option.countsTowards}
+                </span>
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
   );
 }
 

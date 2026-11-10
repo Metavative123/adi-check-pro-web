@@ -103,7 +103,7 @@ export default function PerformanceCard({ performance }: { performance: Performa
           className="w-32"
           label={`Pass rate ${metrics.passRate}%`}
         />
-        <p className="mt-2 text-sm text-white/70">Pass rate</p>
+        <p className="mt-2 text-sm text-white/70">Pass rate · all tests</p>
         <p className="text-2xl font-semibold">{metrics.passRate}%</p>
         <p className="mt-1 text-xs text-white/40">
           triggers at {thresholds.passRate}% or below

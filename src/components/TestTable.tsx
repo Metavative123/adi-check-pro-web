@@ -60,6 +60,15 @@ export default function TestTable({
                     {t.faults.driving} driving · {t.faults.serious} serious ·{" "}
                     {t.faults.dangerous} dangerous
                   </span>
+                  {t.pupilOwnCar && (
+                    <>
+                      <span>·</span>
+                      <span>
+                        Pupil&apos;s car
+                        {t.adiLinked === false ? " · overall pass rate only" : " · ADI number supplied"}
+                      </span>
+                    </>
+                  )}
                 </p>
               </div>
 

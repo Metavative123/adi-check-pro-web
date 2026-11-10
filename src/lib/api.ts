@@ -34,8 +34,26 @@ export type Test = {
   totalFaults: number;
   physicalIntervention: boolean;
   verbalIntervention: boolean;
+  // Taken in the pupil's own car, and whether the ADI number was supplied
+  // then. In the instructor's car the number always is.
+  pupilOwnCar?: boolean;
+  adiNumberSupplied?: boolean;
+  // Counts towards the ADI-linked pass rate as well as the overall one.
+  adiLinked?: boolean;
   createdAt: string;
 };
+
+// One of the two pass rates. percent is null with no tests to divide by.
+export type PassRate = {
+  label: string;
+  // Which tests it covers, in a sentence.
+  includes: string;
+  passed: number;
+  tests: number;
+  percent: number | null;
+};
+
+export type PassRates = { adiLinked: PassRate; overall: PassRate };
 
 export type Metrics = {
   drivingFaultAverage: number;
@@ -68,6 +86,7 @@ export type Performance = {
   band: "green" | "amber" | "red";
   faultBreakdown?: FaultBreakdown;
   recurringFaults?: RecurringFaults;
+  passRates?: PassRates;
 };
 
 // DL25 items that came up on at least minAppearances of the last
@@ -124,6 +143,8 @@ export type NewTest = {
   faultItems: FaultItems | null;
   physicalIntervention: boolean;
   verbalIntervention: boolean;
+  pupilOwnCar: boolean;
+  adiNumberSupplied: boolean;
 };
 
 export type TrendMonth = {
@@ -302,6 +323,9 @@ export type ReportTest = {
   faultEntry?: "detailed" | "totals";
   isoDate?: string;
   faultItems?: FaultItems | null;
+  pupilOwnCar?: boolean;
+  adiNumberSupplied?: boolean;
+  adiLinked?: boolean;
 };
 
 export type Report = {
@@ -318,6 +342,7 @@ export type Report = {
   };
   instructor: { name: string; adiBadgeNumber: string; testCenters: string[] };
   namesHidden: boolean;
+  passRates?: PassRates;
   totals: {
     tests: number;
     passed: number;
@@ -419,6 +444,13 @@ export const api = {
     request<AuthResult>("/auth/login", { method: "POST", body: { email, password } }),
 
   me: (token: string) => request<{ user: User }>("/auth/me", { token }),
+
+  // Emails a reset link. Answers the same whether or not the email has an account.
+  forgotPassword: (email: string) =>
+    request<null>("/auth/forgot-password", { method: "POST", body: { email } }),
+
+  resetPassword: (token: string, password: string) =>
+    request<AuthResult>("/auth/reset-password", { method: "POST", body: { token, password } }),
 
   // --- profile ---
   updateProfile: (token: string, body: { name?: string; adiBadgeNumber?: string }) =>

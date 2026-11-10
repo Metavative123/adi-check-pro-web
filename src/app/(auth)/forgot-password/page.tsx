@@ -8,31 +8,41 @@ import MarkEmailReadIcon from "@mui/icons-material/MarkEmailRead";
 import AuthLayout from "@/components/AuthLayout";
 import Field from "@/components/Field";
 import Button from "@/components/Button";
+import { api } from "@/lib/api";
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError("");
 
-    // TODO: connect to backend — POST { email } to the reset-link API.
-    console.log("forgot password", { email });
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await api.forgotPassword(email);
       setSent(true);
-    }, 600);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not send the email");
+    }
+    setLoading(false);
   }
 
   if (sent) {
     return (
-      <AuthLayout title="Check your email" subtitle={`We sent a reset link to ${email}.`}>
+      <AuthLayout
+        title="Check your email"
+        subtitle={`If ${email} has an account, we've sent it a reset link.`}
+      >
         <div className="space-y-6">
           <div className="flex items-center gap-3 rounded-lg bg-brand-light p-4 text-sm text-brand-fg">
             <MarkEmailReadIcon />
-            <span>The link expires in 30 minutes.</span>
+            <span>
+              The link expires in 30 minutes. Nothing after a few minutes? Check your spam
+              folder.
+            </span>
           </div>
           <button
             onClick={() => setSent(false)}
@@ -61,6 +71,7 @@ export default function ForgotPasswordPage() {
           onChange={(e) => setEmail(e.target.value)}
           icon={<EmailOutlinedIcon fontSize="small" />}
         />
+        {error && <p className="text-sm text-danger">{error}</p>}
         <Button loading={loading}>Send reset link</Button>
         <BackToLogin />
       </form>

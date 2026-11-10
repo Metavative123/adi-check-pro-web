@@ -52,6 +52,9 @@ export function testsCsv(report: Report) {
     "Dangerous faults",
     "Physical intervention",
     "Verbal intervention",
+    "Car",
+    "ADI number supplied",
+    "Pass rates counted in",
     "Entry",
     "DL25 faults",
   ];
@@ -67,6 +70,9 @@ export function testsCsv(report: Report) {
     t.dangerous,
     t.physicalIntervention ? "Yes" : "No",
     t.verbalIntervention ? "Yes" : "No",
+    t.pupilOwnCar ? "Pupil's own car" : "Instructor's car",
+    t.adiNumberSupplied === false ? "No" : "Yes",
+    t.adiLinked === false ? "Overall only" : "ADI-linked and overall",
     t.faultEntry === "detailed" ? "DL25" : "Totals only",
     dl25Faults(t),
   ]);

@@ -327,11 +327,60 @@ export async function downloadStandardsReport(report: Report) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   y = (doc as any).lastAutoTable.finalY + 8;
 
-  // ---------- Section 5: which DL25 items come up ----------
+  // ---------- Section 5: the two pass rates, kept apart ----------
+  if (report.passRates) {
+    y = sectionHeading(doc, "5. Pass rates", y);
+    for (const rate of [report.passRates.adiLinked, report.passRates.overall]) {
+      autoTable(doc, {
+        startY: y,
+        margin: { left: MARGIN, right: MARGIN },
+        head: [[{ content: rate.label, colSpan: 3 }]],
+        body: [
+          ["Passes", "Total tests", "Pass rate"],
+          [
+            String(rate.passed),
+            String(rate.tests),
+            rate.percent === null ? "-" : `${rate.percent.toFixed(1)}%`,
+          ],
+          [{ content: `Includes: ${rate.includes}`, colSpan: 3 }],
+        ],
+        rowPageBreak: "avoid",
+        styles: { fontSize: 8, cellPadding: 2, lineColor: LINE, lineWidth: 0.1 },
+        headStyles: { fillColor: INK, textColor: 255, fontStyle: "bold" },
+        tableWidth: 140,
+        columnStyles: {
+          0: { cellWidth: 46, halign: "center" },
+          1: { cellWidth: 46, halign: "center" },
+          2: { cellWidth: 48, halign: "center" },
+        },
+        didParseCell: (data) => {
+          if (data.section !== "body") return;
+          if (data.row.index === 0) {
+            data.cell.styles.textColor = MUTED;
+            data.cell.styles.fontSize = 7.5;
+          }
+          if (data.row.index === 1) {
+            data.cell.styles.fontStyle = "bold";
+            data.cell.styles.fontSize = 11;
+          }
+          if (data.row.index === 2) {
+            data.cell.styles.halign = "left";
+            data.cell.styles.textColor = MUTED;
+            data.cell.styles.fontSize = 7.5;
+          }
+        },
+      });
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      y = (doc as any).lastAutoTable.finalY + 5;
+    }
+    y += 3;
+  }
+
+  // ---------- Section 6: which DL25 items come up ----------
   y = faultBreakdownSection(doc, autoTable, report, y, contentWidth);
 
-  // ---------- Section 6: the tests themselves ----------
-  y = sectionHeading(doc, "6. Tests in the reporting period", y);
+  // ---------- Section 7: the tests themselves ----------
+  y = sectionHeading(doc, "7. Tests in the reporting period", y);
 
   if (report.tests.length === 0) {
     paragraph(doc, "No tests were recorded in this period.", y, contentWidth);
@@ -347,6 +396,9 @@ export async function downloadStandardsReport(report: Report) {
       report.tests.some((t) => t.faultEntry === "detailed") &&
       report.tests.some((t) => t.faultEntry !== "detailed");
     const totalsOnly = (t: Report["tests"][number]) => mixed && t.faultEntry !== "detailed";
+    // Pupil's own car with no ADI number: in the overall pass rate only.
+    const overallOnly = (t: Report["tests"][number]) => t.adiLinked === false;
+    const anyOverallOnly = report.tests.some(overallOnly);
 
     autoTable(doc, {
       startY: y,
@@ -364,7 +416,7 @@ export async function downloadStandardsReport(report: Report) {
         ["Driving", "Serious", "Dangerous", "Physical", "Verbal"],
       ],
       body: report.tests.map((t) => [
-        t.reference + (totalsOnly(t) ? " †" : ""),
+        t.reference + (totalsOnly(t) ? " †" : "") + (overallOnly(t) ? " ‡" : ""),
         t.date,
         t.pupilName ?? "Withheld",
         t.testCenter,
@@ -413,7 +465,12 @@ export async function downloadStandardsReport(report: Report) {
     const notes = [
       "Intervention means the examiner took action during the test. Only physical intervention affects the score.",
       ...(mixed
-        ? ["† Entered as totals only, so not included in the fault breakdown (section 5)."]
+        ? ["† Entered as totals only, so not included in the fault breakdown (section 6)."]
+        : []),
+      ...(anyOverallOnly
+        ? [
+            "‡ Pupil's own car, ADI number not supplied: counted in the overall recorded pass rate only, not the ADI-linked pass rate (section 5).",
+          ]
         : []),
       ...(anyToCheck
         ? [
@@ -463,7 +520,7 @@ function faultBreakdownSection(
   y: number,
   width: number
 ): number {
-  y = sectionHeading(doc, "5. Fault breakdown (detailed entries only)", y);
+  y = sectionHeading(doc, "6. Fault breakdown (detailed entries only)", y);
 
   const breakdown = report.faultBreakdown;
   const detailed = breakdown?.detailedTests ?? 0;

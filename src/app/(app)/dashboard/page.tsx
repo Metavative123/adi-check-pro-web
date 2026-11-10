@@ -7,6 +7,7 @@ import PictureAsPdfOutlinedIcon from "@mui/icons-material/PictureAsPdfOutlined";
 import Avatar from "@/components/Avatar";
 import FaultBreakdownCard from "@/components/FaultBreakdownCard";
 import RecurringFaultAlerts from "@/components/RecurringFaultAlerts";
+import PassRatesCard from "@/components/PassRatesCard";
 import LogTestModal from "@/components/LogTestModal";
 import PerformanceCard from "@/components/PerformanceCard";
 import { PerformanceSkeleton } from "@/components/Skeleton";
@@ -103,6 +104,11 @@ export default function DashboardPage() {
 
       {/* Standing right now */}
       {performance ? <PerformanceCard performance={performance} /> : <PerformanceSkeleton />}
+
+      {/* ADI-linked and overall recorded pass rates, side by side */}
+      {performance?.passRates && (
+        <PassRatesCard passRates={performance.passRates} windowMonths={performance.windowMonths} />
+      )}
 
       {/* Faults that keep coming up on the latest tests */}
       {performance?.recurringFaults && (
